@@ -1,0 +1,147 @@
+<?php
+/*
+Plugin Name: Minit
+Plugin URI: http://konstruktors.com
+Description: Combine JS and CSS files and serve them from the upload's folder
+Version: 0.4
+Author: Kaspars Dambis
+Author URI: http://konstruktors.com
+*/
+
+add_action( 'print_scripts_array', 'init_minit_js' );
+add_action( 'wp_print_styles', 'init_minit_css' );
+
+function init_minit_js( $to_do ) {
+	global $wp_scripts;
+
+	if ( is_admin() )
+		return;
+
+	$time_start = microtime(true);
+
+	if ( empty( $to_do ) || in_array( 'minit-js', $to_do ) )
+		return $to_do;
+
+	$files = array();
+	$files_mtime = array();
+	$files_content = array();
+
+	// Sort scripts by groups, header scripts first, footer second
+	asort( $wp_scripts->groups );
+
+	// Use that order to sort them accordingly
+	$to_do = array_keys( $wp_scripts->groups );
+
+	foreach ( $to_do as $script ) {
+		if ( ! empty( $wp_scripts->registered[ $script ]->deps ) ) {
+			foreach ( $wp_scripts->registered[ $script ]->deps as $dep_script ) {
+				$dep_pos = array_search( $dep_script, $to_do );
+
+				if ( $dep_pos !== false ) {
+					array_splice( $to_do, $dep_pos, 1, array( $dep_script, $script ) );
+					$to_do = array_values( array_unique( $to_do ) );
+				}
+			}
+		}
+	}
+
+	foreach ( $to_do as $s => $script ) {
+		$src = str_replace( $wp_scripts->base_url, '', $wp_scripts->registered[ $script ]->src );
+
+		if ( ! file_exists( ABSPATH . $src ) )
+			continue;
+
+		$files[] = ABSPATH . $src;
+		$files_mtime[] = filemtime( ABSPATH . $src );
+		$files_content[] = file_get_contents( ABSPATH . $src );
+
+		unset( $to_do[ $s ] );
+	}
+
+	if ( empty( $files ) )
+		return $to_do;
+
+	$wp_scripts->queue = $to_do;
+
+	$wp_upload_dir = wp_upload_dir();
+
+	if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit/' ) )
+		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit/' ) )
+			return $to_do;
+
+	$combined_file_path = $wp_upload_dir['basedir'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.js';
+	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.js';
+
+	if ( ! file_exists( $combined_file_path ) )
+		if ( ! file_put_contents( $combined_file_path, implode( ' ', $files_content ) ) )
+			return $to_do;
+
+	wp_enqueue_script( 'minit-js', $combined_file_url, null, null, true );
+
+	$time_exec = microtime(true) - $time_start;
+	echo "<!-- minit: $time_exec -->";
+
+	return $to_do;
+}
+
+
+function init_minit_css() {
+	global $wp_styles;
+
+	if ( empty( $wp_styles->queue ) || is_admin() )
+		return;
+
+	$files = array();
+	$files_mtime = array();
+	$files_content = array();
+
+	foreach ( $wp_styles->queue as $s => $script ) {
+		$src = str_replace( $wp_styles->base_url, '', $wp_styles->registered[$script]->src );
+
+		if ( ! file_exists( ABSPATH . $src ) )
+			continue;
+
+		$file_content = file_get_contents( ABSPATH . $src );
+		$file_content = preg_replace( '/url\(([\'"]?)(?!https?:)(.*?)([\'"]?)\)/i', 'url(' . dirname( $wp_styles->registered[$script]->src ) . '/$2)', $file_content );
+
+		$files[] = ABSPATH . $src;
+		$files_mtime[] = filemtime( ABSPATH . $src );
+		$files_content[] = $file_content;
+	}
+
+	if ( empty( $files ) )
+		return;
+
+	$wp_upload_dir = wp_upload_dir();
+
+	if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit/' ) )
+		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit/' ) )
+			return;
+
+	$combined_file_path = $wp_upload_dir['basedir'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
+	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
+
+	//if ( ! file_exists( $combined_file_path ) )
+		if ( ! file_put_contents( $combined_file_path, implode( ' ', $files_content ) ) )
+			return;
+
+	$wp_styles->done = $wp_styles->done + $wp_styles->queue;
+	$wp_styles->queue = array();
+
+	wp_enqueue_style( 'minit-css', apply_filters( 'minit_url_js', $combined_file_url ), null, null );
+}
+
+
+add_action( 'admin_init', 'purge_minit_cache' );
+
+function purge_minit_cache() {
+	if ( ! isset( $_GET['purge_minit'] ) )
+		return;
+
+	$wp_upload_dir = wp_upload_dir();
+
+	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*.*' ) as $minit_file )
+		unlink( $minit_file );
+
+}
+
