@@ -8,14 +8,13 @@ Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
 
-add_action( 'print_scripts_array', 'init_minit_js' );
-add_action( 'wp_print_styles', 'init_minit_css' );
+if ( ! is_admin() ) {
+	add_action( 'print_scripts_array', 'init_minit_js' );
+	add_action( 'wp_print_styles', 'init_minit_css' );
+}
 
 function init_minit_js( $to_do ) {
 	global $wp_scripts;
-
-	if ( is_admin() )
-		return;
 
 	$time_start = microtime(true);
 
@@ -88,7 +87,7 @@ function init_minit_js( $to_do ) {
 function init_minit_css() {
 	global $wp_styles;
 
-	if ( empty( $wp_styles->queue ) || is_admin() )
+	if ( empty( $wp_styles->queue ) )
 		return;
 
 	$files = array();
