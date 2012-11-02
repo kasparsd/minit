@@ -3,18 +3,19 @@
 Plugin Name: Minit
 Plugin URI: http://konstruktors.com
 Description: Combine JS and CSS files and serve them from the upload's folder
-Version: 0.5
+Version: 0.6
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
 
-if ( ! is_admin() ) {
-	add_action( 'print_scripts_array', 'init_minit_js' );
-	add_action( 'wp_print_styles', 'init_minit_css' );
-}
+add_action( 'print_scripts_array', 'init_minit_js' );
+add_action( 'wp_print_styles', 'init_minit_css' );
 
 function init_minit_js( $to_do ) {
 	global $wp_scripts;
+
+	if ( is_admin() )
+		return;
 
 	$time_start = microtime(true);
 
@@ -30,19 +31,13 @@ function init_minit_js( $to_do ) {
 
 	// Use that order to sort them accordingly
 	$to_do = array_keys( $wp_scripts->groups );
+	
+	// Resolve all script deps
+	foreach ( $to_do as $i => $script )
+		if ( ! empty( $wp_scripts->registered[ $script ]->deps ) )
+			array_splice( $to_do, $i, 1, $wp_scripts->registered[ $script ]->deps );
 
-	foreach ( $to_do as $script ) {
-		if ( ! empty( $wp_scripts->registered[ $script ]->deps ) ) {
-			foreach ( $wp_scripts->registered[ $script ]->deps as $dep_script ) {
-				$dep_pos = array_search( $dep_script, $to_do );
-
-				if ( $dep_pos !== false ) {
-					array_splice( $to_do, $dep_pos, 1, array( $dep_script, $script ) );
-					$to_do = array_values( array_unique( $to_do ) );
-				}
-			}
-		}
-	}
+	$to_do = array_unique( $to_do );
 
 	foreach ( $to_do as $s => $script ) {
 		$src = str_replace( $wp_scripts->base_url, '', $wp_scripts->registered[ $script ]->src );
@@ -72,7 +67,7 @@ function init_minit_js( $to_do ) {
 	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.js';
 
 	if ( ! file_exists( $combined_file_path ) )
-		if ( ! file_put_contents( $combined_file_path, implode( ' ', $files_content ) ) )
+		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return $to_do;
 
 	wp_enqueue_script( 'minit-js', $combined_file_url, null, null, true );
@@ -86,6 +81,9 @@ function init_minit_js( $to_do ) {
 
 function init_minit_css() {
 	global $wp_styles;
+
+	if ( is_admin() )
+		return;
 
 	if ( empty( $wp_styles->queue ) )
 		return;
@@ -121,7 +119,7 @@ function init_minit_css() {
 	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
 
 	//if ( ! file_exists( $combined_file_path ) )
-		if ( ! file_put_contents( $combined_file_path, implode( ' ', $files_content ) ) )
+		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return;
 
 	$wp_styles->done = $wp_styles->done + $wp_styles->queue;
