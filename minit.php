@@ -3,7 +3,7 @@
 Plugin Name: Minit
 Plugin URI: http://konstruktors.com
 Description: Combine JS and CSS files and serve them from the upload's folder
-Version: 0.7
+Version: 0.8
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -73,7 +73,7 @@ function init_minit_js( $to_do ) {
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return $to_do;
 
-	wp_enqueue_script( 'minit-js', $combined_file_url, null, null, true );
+	wp_enqueue_script( 'minit-js', $combined_file_url, null, null, apply_filters( 'minit_place_footer', true ) );
 
 	$time_exec = microtime(true) - $time_start;
 	echo "<!-- minit: $time_exec -->";
@@ -107,6 +107,10 @@ function init_minit_css() {
 		$files[] = ABSPATH . $src;
 		$files_mtime[] = filemtime( ABSPATH . $src );
 		$files_content[] = $file_content;
+
+		// Mark these styles as processed
+		unset( $wp_styles->queue[$s] );
+		$wp_styles->done[] = $script;
 	}
 
 	if ( empty( $files ) )
@@ -121,15 +125,13 @@ function init_minit_css() {
 	$combined_file_path = $wp_upload_dir['basedir'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
 	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
 
-	//if ( ! file_exists( $combined_file_path ) )
+	if ( ! file_exists( $combined_file_path ) )
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return;
 
-	$wp_styles->done = $wp_styles->done + $wp_styles->queue;
-	$wp_styles->queue = array();
-
 	wp_enqueue_style( 'minit-css', apply_filters( 'minit_url_js', $combined_file_url ), null, null );
 }
+
 
 add_action( 'admin_init', 'purge_minit_cache' );
 
