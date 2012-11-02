@@ -3,7 +3,7 @@
 Plugin Name: Minit
 Plugin URI: http://konstruktors.com
 Description: Combine JS and CSS files and serve them from the upload's folder
-Version: 0.8
+Version: 0.9
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -14,13 +14,10 @@ add_action( 'wp_print_styles', 'init_minit_css' );
 function init_minit_js( $to_do ) {
 	global $wp_scripts;
 
-	if ( is_admin() )
-		return;
+	if ( is_admin() || empty( $to_do ) || in_array( 'minit-js', $to_do ) )
+		return $to_do;
 
 	$time_start = microtime(true);
-
-	if ( empty( $to_do ) || in_array( 'minit-js', $to_do ) )
-		return $to_do;
 
 	$files = array();
 	$files_mtime = array();
@@ -84,11 +81,8 @@ function init_minit_js( $to_do ) {
 
 function init_minit_css() {
 	global $wp_styles;
-
-	if ( is_admin() )
-		return;
-
-	if ( empty( $wp_styles->queue ) )
+	
+	if ( is_admin() || empty( $wp_styles->queue ) )
 		return;
 
 	$files = array();
