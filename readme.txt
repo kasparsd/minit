@@ -19,5 +19,8 @@ TODO
 
 == Changelog ==
 
+= 0.5 =
+* Fix JS file dependency resolving
+
 = 0.4 =
 * Initial public release
