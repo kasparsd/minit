@@ -1,9 +1,10 @@
 <?php
 /*
 Plugin Name: Minit
-Plugin URI: http://konstruktors.com
-Description: Combine JS and CSS files and serve them from the upload's folder
-Version: 1.1
+Plugin URI: https://github.com/kasparsd/minit
+GitHub URI: https://github.com/kasparsd/minit
+Description: Combine JS and CSS files and serve them from the uploads folder
+Version: 1.2
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -39,7 +40,7 @@ function init_minit_js( $to_do ) {
 	foreach ( $to_do as $s => $script ) {
 		// Remove the domain part from the scripts URL
 		$src = str_replace( $wp_scripts->base_url, '', $wp_scripts->registered[ $script ]->src );
-
+		
 		// Check if this is a local file
 		if ( ! file_exists( ABSPATH . $src ) )
 			continue;
@@ -62,7 +63,7 @@ function init_minit_js( $to_do ) {
 	$wp_scripts->queue = $to_do;
 
 	// Create a hash based on minified files and their mtime
-	$hash = md5( implode( '', $files_mtime ) . implode( '2', $files ) );
+	$hash = md5( implode( '', $files_mtime ) . implode( '', $files ) );
 
 	// Check if we can get this from cache
 	if ( $url = wp_cache_get( 'minit-js' ) ) {
@@ -122,7 +123,7 @@ function init_minit_css() {
 			continue;
 
 		$file_content = file_get_contents( ABSPATH . $src );
-		$file_content = preg_replace( '/url\(([\'"]?)(?!https?:)(.*?)([\'"]?)\)/i', 'url(' . dirname( $wp_styles->registered[$script]->src ) . '/$2)', $file_content );
+		$file_content = preg_replace( '/url\(\'?"?([a-zA-Z0-9=\?\&\-_\s\./]*)\'?"?\)/i', sprintf( "url('%s/$1')", dirname( $wp_styles->registered[$script]->src ) ), $file_content );
 
 		$files[] = ABSPATH . $src;
 		$files_mtime[] = filemtime( ABSPATH . $src );
@@ -138,8 +139,8 @@ function init_minit_css() {
 
 	$wp_upload_dir = wp_upload_dir();
 
-	if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit/' ) )
-		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit/' ) )
+	if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit' ) )
+		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) )
 			return;
 
 	$combined_file_path = $wp_upload_dir['basedir'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
@@ -160,10 +161,11 @@ function purge_minit_cache() {
 		return;
 
 	$wp_upload_dir = wp_upload_dir();
+
 	wp_cache_delete( 'minit-js' );
 	wp_cache_delete( 'minit-css' );
 
-	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*.*' ) as $minit_file )
+	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*' ) as $minit_file )
 		unlink( $minit_file );
 }
 
@@ -172,9 +174,9 @@ function purge_minit_cache() {
  * Print external scripts asynchronously in the footer, using a method similar to Google Analytics
  */
 
-add_action( 'wp_print_footer_scripts', 'add_footer_scripts_async', 5 );
+add_action( 'wp_print_footer_scripts', 'minit_add_footer_scripts_async', 5 );
 
-function add_footer_scripts_async() {
+function minit_add_footer_scripts_async() {
 	global $wp_scripts;
 
 	$wp_scripts->async = array();
@@ -187,9 +189,9 @@ function add_footer_scripts_async() {
 	}
 }
 
-add_action( 'wp_print_footer_scripts', 'print_footer_scripts_async', 20 );
+add_action( 'wp_print_footer_scripts', 'minit_print_footer_scripts_async', 20 );
 
-function print_footer_scripts_async() {
+function minit_print_footer_scripts_async() {
 	global $wp_scripts;
 
 	if ( empty( $wp_scripts->async ) )
