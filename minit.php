@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 1.2
+Version: 1.2.1
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -63,11 +63,12 @@ function init_minit_js( $to_do ) {
 	$wp_scripts->queue = $to_do;
 
 	// Create a hash based on minified files and their mtime
-	$hash = md5( implode( '', $files_mtime ) . implode( '', $files ) );
+	$hash = md5( implode( '-', $files_mtime ) );
 
 	// Check if we can get this from cache
-	if ( $url = wp_cache_get( 'minit-js' ) ) {
+	if ( $url = wp_cache_get( 'minit-js-' . $hash ) ) {
 		wp_enqueue_script( 'minit-js', $url, null, null, $in_footer );
+
 		return $to_do;
 	}
 
@@ -87,7 +88,7 @@ function init_minit_js( $to_do ) {
 
 		// Get the content of script files
 		foreach ( $files as $file )
-			$files_content[] = sprintf( "\n\n/* %s */\n", $src ) . file_get_contents( ABSPATH . $file );
+			$files_content[] = sprintf( "\n\n/* %s */\n", $src ) . file_get_contents( $file );
 
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return $to_do;
@@ -100,7 +101,7 @@ function init_minit_js( $to_do ) {
 	$wp_scripts->groups[ 'minit-js' ] = $in_footer;
 
 	// Store it into cache
-	wp_cache_set( 'minit-js', $combined_file_url );
+	wp_cache_set( 'minit-js-' . $hash, $combined_file_url );
 
 	return $to_do;
 }
@@ -123,7 +124,7 @@ function init_minit_css() {
 			continue;
 
 		$file_content = file_get_contents( ABSPATH . $src );
-		$file_content = preg_replace( '/url\(\'?"?([a-zA-Z0-9=\?\&\-_\s\./]*)\'?"?\)/i', sprintf( "url('%s/$1')", dirname( $wp_styles->registered[$script]->src ) ), $file_content );
+		$file_content = preg_replace( '|url\(\'?"?([a-zA-Z0-9=\?\&\-_\s\./]*)\'?"?\)|i', sprintf( "url('%s/$1')", dirname( $wp_styles->registered[$script]->src ) ), $file_content );
 
 		$files[] = ABSPATH . $src;
 		$files_mtime[] = filemtime( ABSPATH . $src );
@@ -143,8 +144,10 @@ function init_minit_css() {
 		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) )
 			return;
 
-	$combined_file_path = $wp_upload_dir['basedir'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
-	$combined_file_url = $wp_upload_dir['baseurl'] . '/minit/' . md5( implode( '', $files_mtime ) ) . '.css';
+	$hash = md5( implode( '-', $files_mtime ) );
+
+	$combined_file_path = sprintf( '%s/minit/%s.css', $wp_upload_dir['basedir'], $hash );
+	$combined_file_url = sprintf( '%s/minit/%s.css', $wp_upload_dir['baseurl'], $hash );
 
 	if ( ! file_exists( $combined_file_path ) )
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
@@ -180,6 +183,9 @@ function minit_add_footer_scripts_async() {
 	global $wp_scripts;
 
 	$wp_scripts->async = array();
+
+	if ( ! isset( $wp_scripts->queue ) || empty( $wp_scripts->queue ) )
+		return;
 
 	foreach ( $wp_scripts->queue as $handle ) {
 		if ( in_array( $handle, $wp_scripts->in_footer ) && preg_match( '|^(http(s)?\:)?\/\/|i', str_replace( home_url(), '', $wp_scripts->registered[$handle]->src ) ) ) {
