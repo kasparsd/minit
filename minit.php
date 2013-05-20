@@ -88,7 +88,7 @@ function init_minit_js( $to_do ) {
 
 		// Get the content of script files
 		foreach ( $files as $file )
-			$files_content[] = sprintf( "\n\n/* %s */\n", $src ) . file_get_contents( $file );
+			$files_content[] = sprintf( "\n\n/* %s */\n", $file ) . file_get_contents( $file );
 
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files_content ) ) )
 			return $to_do;
