@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 1.2.1
+Version: 0.5.1
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -182,6 +182,9 @@ add_action( 'wp_print_footer_scripts', 'minit_add_footer_scripts_async', 5 );
 function minit_add_footer_scripts_async() {
 	global $wp_scripts;
 
+	if ( ! is_object( $wp_scripts ) )
+		return;
+
 	$wp_scripts->async = array();
 
 	if ( ! isset( $wp_scripts->queue ) || empty( $wp_scripts->queue ) )
@@ -200,7 +203,7 @@ add_action( 'wp_print_footer_scripts', 'minit_print_footer_scripts_async', 20 );
 function minit_print_footer_scripts_async() {
 	global $wp_scripts;
 
-	if ( empty( $wp_scripts->async ) )
+	if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->async ) )
 		return;
 
 	?>

@@ -2,7 +2,7 @@
 Contributors: kasparsd
 Tags: css, js, combine, minify, concatenate, optimization, performance, speed
 Requires at least: 3.1
-Tested up to: 3.4
+Tested up to: 3.6
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -18,6 +18,9 @@ TODO
 2. All external Javascript files loading asynchronosly
 
 == Changelog ==
+
+= 0.5.1 =
+* Check if the WP_Scripts object exists before doing anything
 
 = 0.5 =
 * Fix JS file dependency resolving
