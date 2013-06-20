@@ -40,7 +40,7 @@ function minit_objects( $object, $todo, $extension ) {
 		$src = str_replace( $object->base_url, '', $object->registered[ $script ]->src );
 
 		// Skip if the file is not hosted locally
-		if ( ! file_exists( ABSPATH . $src ) )
+		if ( ! file_exists( ABSPATH . $src ) || empty( $src ) )
 			continue;
 
 		$files[ $script ] = apply_filters( 
