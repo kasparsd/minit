@@ -22,8 +22,12 @@ TODO
 
 == Changelog ==
 
+= 0.6.3 =
+* Mark merged items as done.
+* Use cache key for script handle key instead of minit-css and minit-js.
+
 = 0.6.2 =
-* Add a caching layer
+* Add a caching layer.
 
 = 0.6.1 =
 * Print related inline scripts, if any.
