@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.6.2 =
+* Add a caching layer
+
 = 0.6.1 =
 * Print related inline scripts, if any.
 * Add remaining scripts to the print queue.
