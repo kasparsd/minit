@@ -22,6 +22,10 @@ TODO
 
 == Changelog ==
 
+= 0.6.1 =
+* Almost a complete rewrite to merge the functionality of minit logic.
+* Fixes CSS URL path for scripts that use relative URLs
+
 = 0.6 =
 * Almost a complete rewrite to merge the functionality of minit logic.
 * Fixes CSS URL path for scripts that use relative URLs

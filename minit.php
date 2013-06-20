@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.6
+Version: 0.6.1
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -50,6 +50,11 @@ function minit_objects( $object, $todo, $extension ) {
 				$script
 			);
 
+		// Print extra scripts for this item now because we will be removing 
+		// this script from the list of items to print.
+		if ( method_exists( $object, 'print_extra_script' ) )
+			$object->print_extra_script( $script );
+
 		$files_mtime[] = filemtime( ABSPATH . $src );
 	}
 
@@ -70,7 +75,7 @@ function minit_objects( $object, $todo, $extension ) {
 	$combined_file_url = sprintf( '%s/minit/%s.%s', $wp_upload_dir['baseurl'], $hash, $extension );
 
 	// Store the combined file on the filesystem
-	//if ( ! file_exists( $combined_file_path ) )
+	if ( ! file_exists( $combined_file_path ) )
 		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files ) ) )
 			return $todo;
 
@@ -83,7 +88,7 @@ function minit_objects( $object, $todo, $extension ) {
 			'minit-' . $extension, 
 			apply_filters( 'minit-url-' . $extension, $combined_file_url ), 
 			null, 
-			null 
+			null
 		);
 	else
 		wp_enqueue_script( 
@@ -94,14 +99,14 @@ function minit_objects( $object, $todo, $extension ) {
 			apply_filters( 'minit-js-in-footer', true )
 		);
 
-	// Add remaining elements to the queue
-	$object->queue = $todo;
-
-	// Mark the minit scripts as done
-	$object->done = array_merge( $object->done, array_keys( $files ) );
+	// Set processed minit scripts as done
+	// $object->done = array_merge( $object->done, array_keys( $files ) );
 
 	// This is necessary to print this out now
 	$todo[] = 'minit-' . $extension;
+
+	// Add remaining elements to the queue
+	$object->queue = $todo;
 
 	// Make sure that minit JS script is placed either in header/footer
 	if ( $extension == 'js' )
