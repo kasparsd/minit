@@ -43,7 +43,7 @@ function minit_objects( $object, $todo, $extension ) {
 	$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
 
 	// Try to get queue from cache
-	if ( $cache = get_transient( 'minit-' . $extension ) )
+	if ( $cache = get_transient( 'minit-' . $cache_ver ) )
 		if ( is_array( $cache ) && $cache['cache_ver'] == $cache_ver )
 			return minit_enqueue_files( $object, $cache );
 
@@ -92,8 +92,8 @@ function minit_objects( $object, $todo, $extension ) {
 			'extension' => $extension
 		);
 
-	// Cache this queue
-	set_transient( 'minit-' . $extension, $status );
+	// Cache this set of scripts for 24 hours
+	set_transient( 'minit-' . $cache_ver, $status, 24 * 60 * 60 );
 
 	return minit_enqueue_files( $object, $status );	
 }
