@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.6.1
+Version: 0.6.2
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -29,11 +29,23 @@ function init_minit_css( $todo ) {
 
 
 function minit_objects( $object, $todo, $extension ) {
-	if ( is_admin() || empty( $todo ) )
+	// Don't run if on admin or already processed
+	if ( is_admin() || empty( $todo ) || in_array( 'minit-' . $extension, $todo ) )
 		return $todo;
 
-	$files = array();
-	$files_mtime = array();
+	$done = array();
+	$ver = array();
+
+	// Use script version to generate a cache key
+	foreach ( $todo as $t => $script )
+		$ver[] = sprintf( '%s-%s', $script, $object->registered[ $script ]->ver );
+
+	$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
+
+	// Try to get queue from cache
+	if ( $cache = get_transient( 'minit-' . $extension ) )
+		if ( is_array( $cache ) && $cache['cache_ver'] == $cache_ver )
+			return minit_enqueue_files( $object, $cache );
 
 	foreach ( $todo as $t => $script ) {
 		// Make sure this is a relative URL so that we can check if it is local
@@ -43,22 +55,15 @@ function minit_objects( $object, $todo, $extension ) {
 		if ( ! file_exists( ABSPATH . $src ) || empty( $src ) )
 			continue;
 
-		$files[ $script ] = apply_filters( 
+		$done[ $script ] = apply_filters( 
 				'minit-content-' . $extension, 
 				file_get_contents( ABSPATH . $src ),
 				$object,
 				$script
 			);
-
-		// Print extra scripts for this item now because we will be removing 
-		// this script from the list of items to print.
-		if ( method_exists( $object, 'print_extra_script' ) )
-			$object->print_extra_script( $script );
-
-		$files_mtime[] = filemtime( ABSPATH . $src );
 	}
 
-	if ( empty( $files ) )
+	if ( empty( $done ) )
 		return $todo;
 
 	$wp_upload_dir = wp_upload_dir();
@@ -68,32 +73,55 @@ function minit_objects( $object, $todo, $extension ) {
 		if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) )
 			return $todo;
 
-	// Generate a unique
-	$hash = md5( implode( '-', $files_mtime ) );
+	$combined_file_path = sprintf( '%s/minit/%s.%s', $wp_upload_dir['basedir'], $cache_ver, $extension );
+	$combined_file_url = sprintf( '%s/minit/%s.%s', $wp_upload_dir['baseurl'], $cache_ver, $extension );
 
-	$combined_file_path = sprintf( '%s/minit/%s.%s', $wp_upload_dir['basedir'], $hash, $extension );
-	$combined_file_url = sprintf( '%s/minit/%s.%s', $wp_upload_dir['baseurl'], $hash, $extension );
+	// Allow other plugins to do something with the resulting URL
+	$combined_file_url = apply_filters( 'minit-url-' . $extension, $combined_file_url, $done );
 
 	// Store the combined file on the filesystem
 	if ( ! file_exists( $combined_file_path ) )
-		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $files ) ) )
+		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $done ) ) )
 			return $todo;
 
-	// Remove scripts that were merged
-	$todo = array_diff( $todo, array_keys( $files ) );
+	$status = array(
+			'cache_ver' => $cache_ver,
+			'todo' => $todo,
+			'done' => array_keys( $done ),
+			'url' => $combined_file_url,
+			'extension' => $extension
+		);
 
-	// Enqueue the minit file
+	// Cache this queue
+	set_transient( 'minit-' . $extension, $status );
+
+	return minit_enqueue_files( $object, $status );	
+}
+
+
+function minit_enqueue_files( $object, $status ) {
+	extract( $status );
+
+	// Remove scripts that were merged
+	$todo = array_diff( $todo, $done );
+
+	// Print extra scripts for all items in the queue
+	if ( method_exists( $object, 'print_extra_script' ) )
+		foreach ( $done as $script )
+			$object->print_extra_script( $script );
+
+	// Enqueue the minit file based
 	if ( $extension == 'css' )
 		wp_enqueue_style( 
 			'minit-' . $extension, 
-			apply_filters( 'minit-url-' . $extension, $combined_file_url ), 
+			$url, 
 			null, 
 			null
 		);
 	else
 		wp_enqueue_script( 
 			'minit-' . $extension, 
-			apply_filters( 'minit-url-' . $extension, $combined_file_url ), 
+			$url, 
 			null, 
 			null,
 			apply_filters( 'minit-js-in-footer', true )
