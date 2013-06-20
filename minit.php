@@ -30,7 +30,7 @@ function init_minit_css( $todo ) {
 
 function minit_objects( $object, $todo, $extension ) {
 	// Don't run if on admin or already processed
-	if ( is_admin() || empty( $todo ) || in_array( 'minit-' . $extension, $todo ) )
+	if ( is_admin() || empty( $todo ) )
 		return $todo;
 
 	$done = array();
@@ -113,32 +113,32 @@ function minit_enqueue_files( $object, $status ) {
 	// Enqueue the minit file based
 	if ( $extension == 'css' )
 		wp_enqueue_style( 
-			'minit-' . $extension, 
+			'minit-' . $cache_ver, 
 			$url, 
 			null, 
 			null
 		);
 	else
 		wp_enqueue_script( 
-			'minit-' . $extension, 
+			'minit-' . $cache_ver, 
 			$url, 
 			null, 
 			null,
 			apply_filters( 'minit-js-in-footer', true )
 		);
 
-	// Set processed minit scripts as done
-	// $object->done = array_merge( $object->done, array_keys( $files ) );
-
 	// This is necessary to print this out now
-	$todo[] = 'minit-' . $extension;
+	$todo[] = 'minit-' . $cache_ver;
 
 	// Add remaining elements to the queue
 	$object->queue = $todo;
 
+	// Mark these items as done
+	$object->done = array_merge( $object->done, $done );
+
 	// Make sure that minit JS script is placed either in header/footer
 	if ( $extension == 'js' )
-		$object->groups[ 'minit-' . $extension ] = apply_filters( 'minit-js-in-footer', true );
+		$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
 
 	return $todo;
 }
