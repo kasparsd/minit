@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.6.4 =
+* Set cache lifetime to 24h and use file versions as cache key
+
 = 0.6.3 =
 * Mark merged items as done.
 * Use cache key for script handle key instead of minit-css and minit-js.
