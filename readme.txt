@@ -8,16 +8,23 @@ License: GPLv2 or later
 
 Combine CSS files and Javascript files into single file in the correct order. Use the latest modified time in filename generation to ensure freshness. Load all external Javascript files asynchronosly.
 
+
 == Description ==
 
 TODO
+
 
 == Screenshots ==
 
 1. All CSS files combined in a single file
 2. All external Javascript files loading asynchronosly
 
+
 == Changelog ==
+
+= 0.6 =
+* Almost a complete rewrite to merge the functionality of minit logic.
+* Fixes CSS URL path for scripts that use relative URLs
 
 = 0.5.1 =
 * Check if the WP_Scripts object exists before doing anything
