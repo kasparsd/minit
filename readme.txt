@@ -23,18 +23,18 @@ TODO
 == Changelog ==
 
 = 0.6.1 =
-* Almost a complete rewrite to merge the functionality of minit logic.
-* Fixes CSS URL path for scripts that use relative URLs
+* Print related inline scripts, if any.
+* Add remaining scripts to the print queue.
 
 = 0.6 =
 * Almost a complete rewrite to merge the functionality of minit logic.
-* Fixes CSS URL path for scripts that use relative URLs
+* Fixes CSS URL path for scripts that use relative URLs.
 
 = 0.5.1 =
-* Check if the WP_Scripts object exists before doing anything
+* Check if the WP_Scripts object exists before doing anything.
 
 = 0.5 =
-* Fix JS file dependency resolving
+* Fix JS file dependency resolving.
 
 = 0.4 =
-* Initial public release
+* Initial public release.
