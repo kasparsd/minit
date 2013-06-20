@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.5.1
+Version: 0.5.2
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -49,7 +49,7 @@ function init_minit_js( $to_do ) {
 		$files_mtime[] = filemtime( ABSPATH . $src );
 		
 		// Print extra strings inline
-		$wp_scripts->print_scripts_l10n( $script );
+		$wp_scripts->print_extra_script( $script );
 
 		// We are going to include this into our combined scripts, so we remove it from the todo
 		unset( $to_do[ $s ] );
