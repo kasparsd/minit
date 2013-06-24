@@ -22,8 +22,11 @@ TODO
 
 == Changelog ==
 
+= 0.6.5 =
+* Make sure that cache file exists before using it.
+
 = 0.6.4 =
-* Set cache lifetime to 24h and use file versions as cache key
+* Set cache lifetime to 24h and use file versions as cache key.
 
 = 0.6.3 =
 * Mark merged items as done.
