@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.6.6 =
+* Store cache file path in transient so that we can verify it exists before using it.
+
 = 0.6.5 =
 * Make sure that cache file exists before using it.
 

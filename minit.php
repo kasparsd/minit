@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.6.5
+Version: 0.6.6
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -43,9 +43,13 @@ function minit_objects( $object, $todo, $extension ) {
 	$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
 
 	// Try to get queue from cache
-	if ( $cache = get_transient( 'minit-' . $cache_ver ) )
-		if ( is_array( $cache ) && $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
-			return minit_enqueue_files( $object, $cache );
+	$cache = wp_parse_args( 
+			get_transient( 'minit-' . $cache_ver ),
+			array_flip( array( 'cache_ver', 'todo', 'done', 'url', 'file', 'extension' ) )
+		);
+	
+	if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
+		return minit_enqueue_files( $object, $cache );
 
 	foreach ( $todo as $t => $script ) {
 		// Make sure this is a relative URL so that we can check if it is local
