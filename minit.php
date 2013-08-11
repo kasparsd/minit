@@ -153,6 +153,11 @@ add_filter( 'minit-content-css', 'minit_comment_combined', 10, 3 );
 add_filter( 'minit-content-js', 'minit_comment_combined', 10, 3 );
 
 function minit_comment_combined( $content, $object, $script ) {
+
+	if ( '.js' == strtolower( substr( $object->registered[ $script ]->src, -3 ) ) ) {
+		$content = "try{\n" . $content . "\n} catch (e) {}\n";
+	}
+
 	return sprintf( 
 			"\n\n/* Minit: %s */\n", 
 			$object->registered[ $script ]->src
