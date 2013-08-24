@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.6.7 =
+* Add "Clear cache" link in the plugin list.
+
 = 0.6.6 =
 * Store cache file path in transient so that we can verify it exists before using it.
 
