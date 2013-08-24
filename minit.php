@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.6.6
+Version: 0.6.7
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -173,19 +173,51 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 }
 
 
+/**
+ * Add a Purge Cache link to the plugin list
+ */
+add_filter( 'plugin_action_links_' . 'minit/minit.php', 'minit_cache_purge_admin_link' );
+
+function minit_cache_purge_admin_link( $links ) {
+	$links[] = sprintf( 
+			'<a href="%s">%s</a>', 
+			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ), 
+			__( 'Purge Minit Cache', 'minit' ) 
+		);
+
+	return $links;
+}
+
+
+/**
+ * Maybe purge minit cache
+ */
 add_action( 'admin_init', 'purge_minit_cache' );
 
 function purge_minit_cache() {
 	if ( ! isset( $_GET['purge_minit'] ) )
 		return;
 
-	$wp_upload_dir = wp_upload_dir();
+	if ( ! check_admin_referer( 'purge_minit' ) )
+		return;
 
-	wp_cache_delete( 'minit-js' );
-	wp_cache_delete( 'minit-css' );
+	$wp_upload_dir = wp_upload_dir();
 
 	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*' ) as $minit_file )
 		unlink( $minit_file );
+
+	add_action( 'admin_notices', 'minit_cache_purged_notice' );
+
+}
+
+
+function minit_cache_purged_notice() {
+
+	printf( 
+		'<div class="updated"><p>%s</p></div>', 
+		__( 'Minit cache clear!' ) 
+	);
+
 }
 
 
