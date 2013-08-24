@@ -176,7 +176,7 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 /**
  * Add a Purge Cache link to the plugin list
  */
-add_filter( 'plugin_action_links_' . 'minit/minit.php', 'minit_cache_purge_admin_link' );
+add_filter( 'plugin_action_links_' . basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'minit_cache_purge_admin_link' );
 
 function minit_cache_purge_admin_link( $links ) {
 	$links[] = sprintf( 
