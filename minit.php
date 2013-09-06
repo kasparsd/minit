@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.6.7
+Version: 0.6.8
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -83,9 +83,12 @@ function minit_objects( $object, $todo, $extension ) {
 	// Allow other plugins to do something with the resulting URL
 	$combined_file_url = apply_filters( 'minit-url-' . $extension, $combined_file_url, $done );
 
+	// Allow other plugins to minify and obfuscate
+	$done_imploded = apply_filters( 'minit-content-' . $extension, implode( "\n\n", $done ), $done );
+
 	// Store the combined file on the filesystem
 	if ( ! file_exists( $combined_file_path ) )
-		if ( ! file_put_contents( $combined_file_path, implode( "\n\n", $done ) ) )
+		if ( ! file_put_contents( $combined_file_path, $done_imploded ) )
 			return $todo;
 
 	$status = array(

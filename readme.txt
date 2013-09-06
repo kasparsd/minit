@@ -2,7 +2,7 @@
 Contributors: kasparsd
 Tags: css, js, combine, minify, concatenate, optimization, performance, speed
 Requires at least: 3.1
-Tested up to: 3.6
+Tested up to: 3.7
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -21,6 +21,9 @@ TODO
 
 
 == Changelog ==
+
+= 0.6.8 =
+* Add a filter to allow other plugins interact with combined file content.
 
 = 0.6.7 =
 * Add "Clear cache" link in the plugin list.
