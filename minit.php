@@ -60,7 +60,7 @@ function minit_objects( $object, $todo, $extension ) {
 			continue;
 
 		$done[ $script ] = apply_filters( 
-				'minit-content-' . $extension, 
+				'minit-item-' . $extension, 
 				file_get_contents( ABSPATH . $src ),
 				$object,
 				$script
