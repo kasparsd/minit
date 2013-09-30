@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.7
+Version: 0.8
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -168,11 +168,24 @@ add_filter( 'minit-item-css', 'minit_resolve_css_urls', 10, 3 );
 function minit_resolve_css_urls( $content, $object, $script ) {
 	$src = str_replace( $object->base_url, '', $object->registered[ $script ]->src );
 
+	if ( is_ssl() )
+		$object->base_url = str_replace( 'http://', 'https://', $object->base_url );
+
 	return preg_replace( 
 			'|url\(\'?"?([a-zA-Z0-9=\?\&\-_\s\./]*)\'?"?\)|i', 
 			sprintf( "url('%s/$1')", $object->base_url . dirname( $src ) ), 
 			$content
 		);
+}
+
+
+add_filter( 'minit-url-css', 'minit_maybe_ssl_url' );
+
+function minit_maybe_ssl_url( $url ) {
+	if ( is_ssl() )
+		return str_replace( 'http://', 'https://', $url );
+
+	return $url;
 }
 
 
@@ -218,7 +231,7 @@ function minit_cache_purged_notice() {
 
 	printf( 
 		'<div class="updated"><p>%s</p></div>', 
-		__( 'Minit cache clear!' ) 
+		__( 'Minit cache clear!', 'minit' ) 
 	);
 
 }
@@ -242,6 +255,7 @@ function minit_add_footer_scripts_async() {
 		return;
 
 	foreach ( $wp_scripts->queue as $handle ) {
+		// Check if script is external
 		if ( in_array( $handle, $wp_scripts->in_footer ) && preg_match( '|^(https?:)?//|', str_replace( home_url(), '', $wp_scripts->registered[$handle]->src ) ) ) {
 			$wp_scripts->async[] = $handle;
 			wp_dequeue_script( $handle );

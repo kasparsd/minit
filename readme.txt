@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.8 =
+* Add SSL support
+
 = 0.6.8 =
 * Add a filter to allow other plugins interact with combined file content.
 
