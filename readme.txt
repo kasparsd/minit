@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.8.2 =
+* Don't use `set_url_scheme()` because it assumes SSL by default
+
 = 0.8.1 =
 * Use `set_url_scheme()` instead of an `is_ssl()` check
 
