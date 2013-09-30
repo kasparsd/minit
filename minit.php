@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.8
+Version: 0.8.1
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -182,10 +182,7 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 add_filter( 'minit-url-css', 'minit_maybe_ssl_url' );
 
 function minit_maybe_ssl_url( $url ) {
-	if ( is_ssl() )
-		return str_replace( 'http://', 'https://', $url );
-
-	return $url;
+	return set_url_scheme( $url );
 }
 
 

@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.8.1 =
+* Use `set_url_scheme()` instead of an `is_ssl()` check
+
 = 0.8 =
 * Add SSL support
 
