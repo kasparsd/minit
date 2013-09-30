@@ -22,6 +22,9 @@ TODO
 
 == Changelog ==
 
+= 0.8.4 =
+* Include is_ssl() in cache key
+
 = 0.8.2 =
 * Don't use `set_url_scheme()` because it assumes SSL by default
 

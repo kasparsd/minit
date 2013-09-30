@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder
-Version: 0.8.3
+Version: 0.8.4
 Author: Kaspars Dambis
 Author URI: http://konstruktors.com
 */
@@ -35,6 +35,9 @@ function minit_objects( $object, $todo, $extension ) {
 
 	$done = array();
 	$ver = array();
+
+	// Use different cache key for SSL and non-SSL
+	$ver[] = 'is_ssl-' . is_ssl();
 
 	// Use script version to generate a cache key
 	foreach ( $todo as $t => $script )
