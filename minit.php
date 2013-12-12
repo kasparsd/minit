@@ -223,8 +223,11 @@ function purge_minit_cache() {
 
 	$wp_upload_dir = wp_upload_dir();
 
-	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*' ) as $minit_file )
-		unlink( $minit_file );
+	if ( $minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' ) ) {
+		foreach ( $minit_files as $minit_file ) {
+			unlink( $minit_file );
+		}
+	}
 
 	add_action( 'admin_notices', 'minit_cache_purged_notice' );
 
