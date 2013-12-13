@@ -2,7 +2,7 @@
 Contributors: kasparsd
 Tags: css, js, combine, minify, concatenate, optimization, performance, speed
 Requires at least: 3.1
-Tested up to: 3.7
+Tested up to: 3.8
 Stable tag: trunk
 License: GPLv2 or later
 
