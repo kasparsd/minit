@@ -175,7 +175,7 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 		$object->base_url = str_replace( 'http://', 'https://', $object->base_url );
 
 	return preg_replace( 
-			'|url\(\'?"?([a-zA-Z0-9=\?\&\-_\s\./]*)\'?"?\)|i', 
+			'|url\((?:[\'"]+)?(.*?)(?:[\'"]+)?\)|ig', 
 			sprintf( "url('%s/$1')", $object->base_url . dirname( $src ) ), 
 			$content
 		);
