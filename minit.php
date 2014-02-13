@@ -234,6 +234,7 @@ function purge_minit_cache() {
 		}
 
 		add_action( 'admin_notices', 'minit_cache_purged_success' );
+		do_action( 'minit-cache-purged' );
 	} else {
 		add_action( 'admin_notices', 'minit_cache_purged_error' );
 	}
@@ -253,7 +254,7 @@ function minit_cache_purged_success() {
 function minit_cache_purged_error() {
 
 	printf( 
-		'<div class="updated"><p>%s</p></div>', 
+		'<div class="error"><p>%s</p></div>', 
 		__( 'Error: Failed to purge Minit cache.', 'minit' ) 
 	);
 
