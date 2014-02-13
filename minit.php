@@ -126,14 +126,14 @@ function minit_enqueue_files( $object, $status ) {
 			$object->print_extra_script( $script );
 
 	// Enqueue the minit file based
-	if ( $extension == 'css' )
+	if ( $extension == 'css' ) {
 		wp_enqueue_style( 
 			'minit-' . $cache_ver, 
 			$url, 
 			null, 
 			null
 		);
-	else
+	} else {
 		wp_enqueue_script( 
 			'minit-' . $cache_ver, 
 			$url, 
@@ -141,6 +141,7 @@ function minit_enqueue_files( $object, $status ) {
 			null,
 			apply_filters( 'minit-js-in-footer', true )
 		);
+	}
 
 	// This is necessary to print this out now
 	$todo[] = 'minit-' . $cache_ver;
