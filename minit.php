@@ -226,20 +226,35 @@ function purge_minit_cache() {
 		return;
 
 	$wp_upload_dir = wp_upload_dir();
+	$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
 
-	foreach ( glob( $wp_upload_dir['basedir'] . '/minit/*' ) as $minit_file )
-		unlink( $minit_file );
+	if ( $minit_files ) {
+		foreach ( $minit_files as $minit_file ) {
+			unlink( $minit_file );
+		}
 
-	add_action( 'admin_notices', 'minit_cache_purged_notice' );
+		add_action( 'admin_notices', 'minit_cache_purged_success' );
+	} else {
+		add_action( 'admin_notices', 'minit_cache_purged_error' );
+	}
+}
+
+
+function minit_cache_purged_success() {
+
+	printf( 
+		'<div class="updated"><p>%s</p></div>', 
+		__( 'Success: Minit cache purged.', 'minit' ) 
+	);
 
 }
 
 
-function minit_cache_purged_notice() {
+function minit_cache_purged_error() {
 
 	printf( 
 		'<div class="updated"><p>%s</p></div>', 
-		__( 'Minit cache clear!', 'minit' ) 
+		__( 'Error: Failed to purge Minit cache.', 'minit' ) 
 	);
 
 }
