@@ -43,6 +43,9 @@ function minit_objects( $object, $todo, $extension ) {
 	// Use different cache key for SSL and non-SSL
 	$ver[] = 'is_ssl-' . is_ssl();
 
+	// Use a global cache version key to purge cache
+	$ver[] = 'minit_cache_ver-' . get_option( 'minit_cache_ver' );
+
 	// Use script version to generate a cache key
 	foreach ( $minit_todo as $t => $script )
 		$ver[] = sprintf( '%s-%s', $script, $object->registered[ $script ]->ver );
@@ -226,19 +229,12 @@ function purge_minit_cache() {
 	if ( ! check_admin_referer( 'purge_minit' ) )
 		return;
 
-	$wp_upload_dir = wp_upload_dir();
-	$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+	// Use this as a global cache version number
+	update_option( 'minit_cache_ver', time() );
 
-	if ( $minit_files ) {
-		foreach ( $minit_files as $minit_file ) {
-			unlink( $minit_file );
-		}
+	add_action( 'admin_notices', 'minit_cache_purged_success' );
+	do_action( 'minit-cache-purged' );
 
-		add_action( 'admin_notices', 'minit_cache_purged_success' );
-		do_action( 'minit-cache-purged' );
-	} else {
-		add_action( 'admin_notices', 'minit_cache_purged_error' );
-	}
 }
 
 
@@ -252,12 +248,19 @@ function minit_cache_purged_success() {
 }
 
 
-function minit_cache_purged_error() {
+// This can used from cron to delete all Minit cache files
+add_action( 'minit-cache-purge-delete', 'minit_cache_delete_files' );
 
-	printf( 
-		'<div class="error"><p>%s</p></div>', 
-		__( 'Error: Failed to purge Minit cache.', 'minit' ) 
-	);
+function minit_cache_delete_files() {
+
+	$wp_upload_dir = wp_upload_dir();
+	$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+
+	if ( $minit_files ) {
+		foreach ( $minit_files as $minit_file ) {
+			unlink( $minit_file );
+		}
+	}
 
 }
 
