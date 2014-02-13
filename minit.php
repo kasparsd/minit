@@ -206,7 +206,7 @@ function minit_cache_purge_admin_link( $links ) {
 	$links[] = sprintf( 
 			'<a href="%s">%s</a>', 
 			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ), 
-			__( 'Purge Minit Cache', 'minit' ) 
+			__( 'Purge cache', 'minit' ) 
 		);
 
 	return $links;
