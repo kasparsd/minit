@@ -33,7 +33,7 @@ function minit_objects( $object, $todo, $extension ) {
 	if ( is_admin() || empty( $todo ) )
 		return $todo;
 
-	// Allow plugins to exclude certain files from being concatenated
+	// Allow files to be excluded from Minit
 	$minit_exclude = apply_filters( 'minit-exclude-' . $extension, array() );
 	$minit_todo = array_diff( $todo, (array) $minit_exclude );
 
@@ -100,7 +100,7 @@ function minit_objects( $object, $todo, $extension ) {
 
 	$status = array(
 			'cache_ver' => $cache_ver,
-			'todo' => $minit_todo,
+			'todo' => $todo,
 			'done' => array_keys( $done ),
 			'url' => $combined_file_url,
 			'file' => $combined_file_path,
