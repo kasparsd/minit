@@ -33,6 +33,10 @@ function minit_objects( $object, $todo, $extension ) {
 	if ( is_admin() || empty( $todo ) )
 		return $todo;
 
+	// Allow plugins to exclude certain files from being concatenated
+	$minit_exclude = apply_filters( 'minit-exclude-' . $extension, array() );
+	$minit_todo = array_diff( $todo, (array) $minit_exclude );
+
 	$done = array();
 	$ver = array();
 
@@ -40,7 +44,7 @@ function minit_objects( $object, $todo, $extension ) {
 	$ver[] = 'is_ssl-' . is_ssl();
 
 	// Use script version to generate a cache key
-	foreach ( $todo as $t => $script )
+	foreach ( $minit_todo as $t => $script )
 		$ver[] = sprintf( '%s-%s', $script, $object->registered[ $script ]->ver );
 
 	$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
@@ -54,7 +58,7 @@ function minit_objects( $object, $todo, $extension ) {
 	if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
 		return minit_enqueue_files( $object, $cache );
 
-	foreach ( $todo as $t => $script ) {
+	foreach ( $minit_todo as $t => $script ) {
 		// Make sure this is a relative URL so that we can check if it is local
 		$src = str_replace( $object->base_url, '', $object->registered[ $script ]->src );
 
@@ -96,7 +100,7 @@ function minit_objects( $object, $todo, $extension ) {
 
 	$status = array(
 			'cache_ver' => $cache_ver,
-			'todo' => $todo,
+			'todo' => $minit_todo,
 			'done' => array_keys( $done ),
 			'url' => $combined_file_url,
 			'file' => $combined_file_path,
