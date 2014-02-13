@@ -22,6 +22,12 @@ TODO
 
 == Changelog ==
 
+= 0.8.7 =
+* Use a global version number instead of deleting files for cache purge.
+* Add filters `minit-exclude-css` and `minit-exclude-css` to exclude files from Minit.
+* Add action `minit-cache-purge-delete` that deletes all Minit files. Can be called from cron, for example.
+* Call action `minit-cache-purged` when the global cache version number is bumped.
+
 = 0.8.4 =
 * Include is_ssl() in cache key
 
