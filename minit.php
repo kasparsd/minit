@@ -10,20 +10,20 @@ Author URI: http://kaspars.net
 */
 
 
-add_filter( 'print_scripts_array', 'init_minit_js' );
+add_filter( 'print_scripts_array', 'init_minit_js', 10, 1 );
 
 function init_minit_js( $todo ) {
 	global $wp_scripts;
-	
+
 	return minit_objects( $wp_scripts, $todo, 'js' );
 }
 
 
-add_filter( 'print_styles_array', 'init_minit_css' );
+add_filter( 'print_styles_array', 'init_minit_css', 10, 1 );
 
 function init_minit_css( $todo ) {
 	global $wp_styles;
-	
+
 	return minit_objects( $wp_styles, $todo, 'css' );
 }
 
@@ -57,7 +57,7 @@ function minit_objects( $object, $todo, $extension ) {
 			get_transient( 'minit-' . $cache_ver ),
 			array_flip( array( 'cache_ver', 'todo', 'done', 'url', 'file', 'extension' ) )
 		);
-	
+
 	if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
 		return minit_enqueue_files( $object, $cache );
 
@@ -190,8 +190,8 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 }
 
 
-add_filter( 'minit-url-css', 'minit_maybe_ssl_url' );
-add_filter( 'minit-url-js', 'minit_maybe_ssl_url' );
+add_filter( 'minit-url-css', 'minit_maybe_ssl_url', 10, 1 );
+add_filter( 'minit-url-js', 'minit_maybe_ssl_url', 10, 1 );
 
 function minit_maybe_ssl_url( $url ) {
 	if ( is_ssl() )
@@ -204,7 +204,7 @@ function minit_maybe_ssl_url( $url ) {
 /**
  * Add a Purge Cache link to the plugin list
  */
-add_filter( 'plugin_action_links_' . basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'minit_cache_purge_admin_link' );
+add_filter( 'plugin_action_links_' . basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'minit_cache_purge_admin_link', 10, 1 );
 
 function minit_cache_purge_admin_link( $links ) {
 	$links[] = sprintf( 
@@ -315,4 +315,3 @@ function minit_print_footer_scripts_async() {
 	</script>
 	<?php
 }
-
