@@ -14,11 +14,6 @@ $minit_instance = Minit::instance();
 
 class Minit {
 
-	private $scripts = array( 
-			'css' => array(),
-			'js' => array() 
-		);
-
 	static $instance;
 
 
