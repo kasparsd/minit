@@ -84,8 +84,8 @@ class Minit {
 				array_flip( array( 'cache_ver', 'todo', 'done', 'url', 'file', 'extension' ) )
 			);
 		
-		//if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
-		//	return minit_enqueue_files( $object, $cache );
+		if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
+			return minit_enqueue_files( $object, $cache );
 
 		foreach ( $minit_todo as $t => $script ) {
 
