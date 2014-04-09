@@ -85,7 +85,7 @@ class Minit {
 			);
 		
 		if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
-			return minit_enqueue_files( $object, $cache );
+			return $this->minit_enqueue_files( $object, $cache );
 
 		foreach ( $minit_todo as $t => $script ) {
 
@@ -188,8 +188,6 @@ class Minit {
 		// Make sure that minit JS script is placed either in header/footer
 		if ( $extension == 'js' )
 			$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
-
-		$this->scripts[ $extension ] = array_merge( $this->scripts[ $extension ], $todo );
 
 		return $todo;
 
