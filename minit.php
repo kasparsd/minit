@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 0.9
+Version: 0.9.1
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -244,7 +244,7 @@ function minit_maybe_ssl_url( $url ) {
 /**
  * Add a Purge Cache link to the plugin list
  */
-add_filter( 'plugin_action_links_' . basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'minit_cache_purge_admin_link' );
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'minit_cache_purge_admin_link' );
 
 function minit_cache_purge_admin_link( $links ) {
 
@@ -329,7 +329,7 @@ function minit_add_footer_scripts_async() {
 		return;
 
 	foreach ( $wp_scripts->queue as $handle ) {
-		// Check if script is external
+		// Check if the script is external
 		if ( in_array( $handle, $wp_scripts->in_footer ) && preg_match( '|^(https?:)?//|', str_replace( home_url(), '', $wp_scripts->registered[$handle]->src ) ) ) {
 			$wp_scripts->async[] = $handle;
 			wp_dequeue_script( $handle );
@@ -348,7 +348,7 @@ function minit_print_footer_scripts_async() {
 		return;
 
 	?>
-	<!-- Minit Async: -->
+	<!-- Asynchronous scripts by Minit -->
 	<script id="async-scripts" type="text/javascript">
 	(function() {
 		var js, fjs = document.getElementById('async-scripts'),
