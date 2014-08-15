@@ -4,13 +4,12 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 0.9.2
+Version: 0.9.1
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
 
 $minit_instance = Minit::instance();
-
 
 class Minit {
 
@@ -38,7 +37,7 @@ class Minit {
 	function init_minit_js( $todo ) {
 
 		global $wp_scripts;
-
+		
 		return $this->minit_objects( $wp_scripts, $todo, 'js' );
 
 	}
@@ -47,7 +46,7 @@ class Minit {
 	function init_minit_css( $todo ) {
 
 		global $wp_styles;
-
+		
 		return $this->minit_objects( $wp_styles, $todo, 'css' );
 
 	}
@@ -60,13 +59,14 @@ class Minit {
 			return $todo;
 
 		// Allow files to be excluded from Minit
-		$minit_exclude = apply_filters( 'minit-exclude-' . $extension, array() );
-		$minit_todo = array_diff( $todo, (array) $minit_exclude );
+		$minit_exclude = (array) apply_filters( 'minit-exclude-' . $extension, array() );
+		$minit_todo = array_diff( $todo, $minit_exclude );
 
 		$done = array();
 		$ver = array();
 
-		return $todo;
+		// Debug enable
+		//$ver[] = 'debug-' . time();
 
 		// Use different cache key for SSL and non-SSL
 		$ver[] = 'is_ssl-' . is_ssl();
@@ -81,29 +81,32 @@ class Minit {
 		$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
 
 		// Try to get queue from cache
-		$cache = wp_parse_args( 
-				get_transient( 'minit-' . $cache_ver ),
-				array_flip( array( 'cache_ver', 'todo', 'done', 'url', 'file', 'extension' ) )
-			);
+		$cache = get_transient( 'minit-' . $cache_ver );
 		
-		if ( $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
+		if ( isset( $cache['cache_ver'] ) && $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
 			return $this->minit_enqueue_files( $object, $cache );
 
 		foreach ( $minit_todo as $t => $script ) {
 
-			// Make sure this is a relative URL so that we can check if it is local
-			$src = str_replace( $object->base_url, '', $object->registered[ $script ]->src );
+			// Get the relative URL of the asset
+			$src = self::get_asset_relative_path( 
+					$object->base_url, 
+					$object->registered[ $script ]->src 
+				);
 
 			// Skip if the file is not hosted locally
-			if ( ! file_exists( ABSPATH . $src ) || empty( $src ) )
+			if ( ! $src || ! file_exists( ABSPATH . $src ) )
 				continue;
 
-			$done[ $script ] = apply_filters( 
+			$script_content = apply_filters( 
 					'minit-item-' . $extension, 
 					file_get_contents( ABSPATH . $src ),
 					$object,
 					$script
 				);
+
+			if ( $script_content )
+				$done[ $script ] = $script_content;
 
 		}
 
@@ -153,59 +156,64 @@ class Minit {
 		extract( $status );
 
 		// Remove scripts that were merged
-		$todo = array_diff( $object->queue, $done );
+		$todo = array_diff( $todo, $done );
 
-		switch ( $extension ) {
-			
-			case 'css':
+		// Print extra scripts for all items in the queue
+		if ( method_exists( $object, 'print_extra_script' ) )
+			foreach ( $done as $script )
+				$object->print_extra_script( $script );
 
-				wp_enqueue_style( 
-					'minit-' . $cache_ver, 
-					$url, 
-					null,
-					null
-				);
-
-				break;
-
-			case 'js':
-
-				wp_enqueue_script( 
-					'minit-' . $cache_ver, 
-					$url, 
-					null, 
-					null,
-					apply_filters( 'minit-js-in-footer', true )
-				);
-
-				// Make sure that minit JS script is placed either in header/footer
-				$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
-
-				break;
-			
-			default:
-
-				return $todo;
-
-				break;
-
+		// Enqueue the minit file based
+		if ( $extension == 'css' ) {
+			wp_enqueue_style( 
+				'minit-' . $cache_ver, 
+				$url, 
+				null, 
+				null
+			);
+		} else {
+			wp_enqueue_script( 
+				'minit-' . $cache_ver, 
+				$url, 
+				null, 
+				null,
+				apply_filters( 'minit-js-in-footer', true )
+			);
 		}
-
-		foreach ( $done as $done_item )
-			foreach ( $object->registered[ $done_item ]->extra as $extra_field => $extra_value )
-				if ( in_array( $extra_field, array( 'data', 'after' ) ) )
-					$object->add_data( 'minit-' . $cache_ver, $extra_field, $extra_value );
 
 		// This is necessary to print this out now
 		$todo[] = 'minit-' . $cache_ver;
-
+		
 		// Add remaining elements to the queue
 		$object->queue = $todo;
 
 		// Mark these items as done
 		$object->done = array_merge( $object->done, $done );
 
+		// Make sure that minit JS script is placed either in header/footer
+		if ( $extension == 'js' )
+			$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
+	
 		return $todo;
+
+	}
+
+
+	public static function get_asset_relative_path( $base_url, $item_url ) {
+
+		// Remove protocol reference from the local base URL
+		$base_url = preg_replace( '/^(https?:\/\/|\/\/)/i', '', $base_url );
+
+		// Check if this is a local asset which we can include
+		$src_parts = explode( $base_url, $item_url );
+
+		// Get the trailing part of the local URL
+		$maybe_relative = end( $src_parts );
+
+		if ( ! file_exists( ABSPATH . $maybe_relative ) )
+			return false;
+
+		return $maybe_relative;
 
 	}
 
@@ -213,8 +221,8 @@ class Minit {
 }
 
 
-add_filter( 'minit-item-css', 'minit_comment_combined', 10, 3 );
-add_filter( 'minit-item-js', 'minit_comment_combined', 10, 3 );
+add_filter( 'minit-item-css', 'minit_comment_combined', 15, 3 );
+add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
 
 function minit_comment_combined( $content, $object, $script ) {
 
@@ -226,20 +234,41 @@ function minit_comment_combined( $content, $object, $script ) {
 }
 
 
+/**
+ * Turn all local asset URLs into absolute URLs
+ */
 add_filter( 'minit-item-css', 'minit_resolve_css_urls', 10, 3 );
 
 function minit_resolve_css_urls( $content, $object, $script ) {
 
-	$src = str_replace( $object->base_url, '', $object->registered[ $script ]->src );
+	$src = Minit::get_asset_relative_path( 
+			$object->base_url, 
+			$object->registered[ $script ]->src
+		);
 
-	if ( is_ssl() )
-		$object->base_url = str_replace( 'http://', 'https://', $object->base_url );
-
-	return preg_replace( 
-			'|url\((?:[\'"]+)*(?!data:)(.*?)(?:[\'"]+)*\)|i', 
+	// Make all local asset URLs absolute
+	$content = preg_replace( 
+			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i', 
 			sprintf( "url('%s/$1')", $object->base_url . dirname( $src ) ), 
 			$content
 		);
+
+	return $content;
+
+}
+
+
+/**
+ * Add object style media query to the block of styles
+ */
+add_filter( 'minit-item-css', 'minit_add_css_media', 10, 3 );
+
+function minit_add_css_media( $content, $object, $script ) {
+
+	if ( ! empty( $object->registered[ $script ]->args ) )
+		return sprintf( '@media %s { %s }', $object->registered[ $script ]->args, $content );
+
+	return $content;
 
 }
 
@@ -365,9 +394,9 @@ function minit_print_footer_scripts_async() {
 
 	?>
 	<!-- Asynchronous scripts by Minit -->
-	<script id="async-scripts" type="text/javascript">
+	<script id="minit-async-scripts" type="text/javascript">
 	(function() {
-		var js, fjs = document.getElementById('async-scripts'),
+		var js, fjs = document.getElementById('minit-async-scripts'),
 			add = function( url, id ) {
 				js = document.createElement('script'); 
 				js.type = 'text/javascript'; 
