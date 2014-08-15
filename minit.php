@@ -155,9 +155,6 @@ class Minit {
 
 		extract( $status );
 
-		// Remove scripts that were merged
-		$todo = array_diff( $todo, $done );
-
 		switch ( $extension ) {
 
 			case 'css':
@@ -208,8 +205,12 @@ class Minit {
 			
 			default:
 
-				return;
+				return $todo;
+
 		}
+
+		// Remove scripts that were merged
+		$todo = array_diff( $todo, $done );
 
 		// This is necessary to print this out now
 		$todo[] = 'minit-' . $cache_ver;
