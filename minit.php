@@ -158,27 +158,57 @@ class Minit {
 		// Remove scripts that were merged
 		$todo = array_diff( $todo, $done );
 
-		// Print extra scripts for all items in the queue
-		if ( method_exists( $object, 'print_extra_script' ) )
-			foreach ( $done as $script )
-				$object->print_extra_script( $script );
+		switch ( $extension ) {
 
-		// Enqueue the minit file based
-		if ( $extension == 'css' ) {
-			wp_enqueue_style( 
-				'minit-' . $cache_ver, 
-				$url, 
-				null, 
-				null
-			);
-		} else {
-			wp_enqueue_script( 
-				'minit-' . $cache_ver, 
-				$url, 
-				null, 
-				null,
-				apply_filters( 'minit-js-in-footer', true )
-			);
+			case 'css':
+				
+				wp_enqueue_style( 
+					'minit-' . $cache_ver, 
+					$url, 
+					null, 
+					null
+				);
+
+				// Add inline styles for all minited styles
+				foreach ( $done as $script ) {
+					
+					$inline_style = $object->get_data( $script, 'after' );
+
+					if ( ! empty( $inline_style ) )
+						$object->add_inline_style( 'minit-' . $cache_ver, $inline_style );
+
+				}
+
+				break;
+
+			case 'js':
+
+				wp_enqueue_script( 
+					'minit-' . $cache_ver, 
+					$url, 
+					null, 
+					null,
+					apply_filters( 'minit-js-in-footer', true )
+				);
+
+				// Make sure that minit JS script is placed either in header/footer
+				$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
+
+				// Add inline scripts for all minited scripts
+				foreach ( $done as $script ) {
+					
+					$inline_script = $object->get_data( $script, 'data' );
+
+					if ( ! empty( $inline_script ) )
+						$object->add_data( 'minit-' . $cache_ver, 'data', $inline_script );
+
+				}
+				
+				break;
+			
+			default:
+
+				return;
 		}
 
 		// This is necessary to print this out now
@@ -189,10 +219,6 @@ class Minit {
 
 		// Mark these items as done
 		$object->done = array_merge( $object->done, $done );
-
-		// Make sure that minit JS script is placed either in header/footer
-		if ( $extension == 'js' )
-			$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
 	
 		return $todo;
 
