@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 0.9.1
+Version: 0.9.2
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -38,7 +38,7 @@ class Minit {
 	function init_minit_js( $todo ) {
 
 		global $wp_scripts;
-		
+
 		return $this->minit_objects( $wp_scripts, $todo, 'js' );
 
 	}
@@ -47,7 +47,7 @@ class Minit {
 	function init_minit_css( $todo ) {
 
 		global $wp_styles;
-		
+
 		return $this->minit_objects( $wp_styles, $todo, 'css' );
 
 	}
@@ -65,6 +65,8 @@ class Minit {
 
 		$done = array();
 		$ver = array();
+
+		return $todo;
 
 		// Use different cache key for SSL and non-SSL
 		$ver[] = 'is_ssl-' . is_ssl();
@@ -153,41 +155,55 @@ class Minit {
 		// Remove scripts that were merged
 		$todo = array_diff( $object->queue, $done );
 
-		// Print extra scripts for all items in the queue
-		if ( method_exists( $object, 'print_extra_script' ) )
-			foreach ( $done as $script )
-				$object->print_extra_script( $script );
+		switch ( $extension ) {
+			
+			case 'css':
 
-		// Enqueue the minit file based
-		if ( $extension == 'css' ) {
-			wp_enqueue_style( 
-				'minit-' . $cache_ver, 
-				$url, 
-				null, 
-				null
-			);
-		} else {
-			wp_enqueue_script( 
-				'minit-' . $cache_ver, 
-				$url, 
-				null, 
-				null,
-				apply_filters( 'minit-js-in-footer', true )
-			);
+				wp_enqueue_style( 
+					'minit-' . $cache_ver, 
+					$url, 
+					null,
+					null
+				);
+
+				break;
+
+			case 'js':
+
+				wp_enqueue_script( 
+					'minit-' . $cache_ver, 
+					$url, 
+					null, 
+					null,
+					apply_filters( 'minit-js-in-footer', true )
+				);
+
+				// Make sure that minit JS script is placed either in header/footer
+				$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
+
+				break;
+			
+			default:
+
+				return $todo;
+
+				break;
+
 		}
+
+		foreach ( $done as $done_item )
+			foreach ( $object->registered[ $done_item ]->extra as $extra_field => $extra_value )
+				if ( in_array( $extra_field, array( 'data', 'after' ) ) )
+					$object->add_data( 'minit-' . $cache_ver, $extra_field, $extra_value );
 
 		// This is necessary to print this out now
 		$todo[] = 'minit-' . $cache_ver;
-		
+
 		// Add remaining elements to the queue
 		$object->queue = $todo;
 
 		// Mark these items as done
 		$object->done = array_merge( $object->done, $done );
-
-		// Make sure that minit JS script is placed either in header/footer
-		if ( $extension == 'js' )
-			$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
 
 		return $todo;
 
