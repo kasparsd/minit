@@ -105,7 +105,7 @@ class Minit {
 					$script
 				);
 
-			if ( $script_content )
+			if ( false !== $script_content )
 				$done[ $script ] = $script_content;
 
 		}
@@ -253,6 +253,9 @@ add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
 
 function minit_comment_combined( $content, $object, $script ) {
 
+	if ( ! $content )
+		return $content;
+
 	return sprintf(
 			"\n\n/* Minit: %s */\n", 
 			$object->registered[ $script ]->src
@@ -267,6 +270,9 @@ function minit_comment_combined( $content, $object, $script ) {
 add_filter( 'minit-item-css', 'minit_resolve_css_urls', 10, 3 );
 
 function minit_resolve_css_urls( $content, $object, $script ) {
+
+	if ( ! $content )
+		return $content;
 
 	$src = Minit::get_asset_relative_path( 
 			$object->base_url, 
@@ -285,15 +291,18 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 }
 
 
-/**
- * Add object style media query to the block of styles
- */
-add_filter( 'minit-item-css', 'minit_add_css_media', 10, 3 );
+add_filter( 'minit-item-css', 'minit_exclude_css_with_media_query', 10, 3 );
 
-function minit_add_css_media( $content, $object, $script ) {
+function minit_exclude_css_with_media_query( $content, $object, $script ) {
 
-	if ( ! empty( $object->registered[ $script ]->args ) )
-		return sprintf( '@media %s { %s }', $object->registered[ $script ]->args, $content );
+	if ( ! $content )
+		return $content;
+
+	$whitelist = array( '', 'all', 'screen' );
+
+	// Exclude from Minit if media query specified
+	if ( ! in_array( $object->registered[ $script ]->args, $whitelist ) )
+		return false;
 
 	return $content;
 
