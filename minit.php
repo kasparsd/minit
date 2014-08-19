@@ -440,11 +440,17 @@ function minit_add_footer_scripts_async() {
 		return;
 
 	foreach ( $wp_scripts->queue as $handle ) {
-		// Check if the script is external
-		if ( in_array( $handle, $wp_scripts->in_footer ) && preg_match( '|^(https?:)?//|', str_replace( home_url(), '', $wp_scripts->registered[$handle]->src ) ) ) {
+
+		$script_relative_path = Minit::get_asset_relative_path( 
+			site_url(), 
+			$wp_scripts->registered[$handle]->src
+		);
+
+		if ( in_array( $handle, $wp_scripts->in_footer ) && ! $script_relative_path ) {
 			$wp_scripts->minit_async[] = $handle;
 			wp_dequeue_script( $handle );
 		}
+
 	}
 
 }
