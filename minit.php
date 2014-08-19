@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 0.9.2-dev.1
+Version: 0.9.2-dev.2
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -67,6 +67,9 @@ class Minit {
 
 		// Debug enable
 		//$ver[] = 'debug-' . time();
+
+		// Bust cache on Minit plugin update
+		$ver[] = 'minit-ver-0.9.2';
 
 		// Use different cache key for SSL and non-SSL
 		$ver[] = 'is_ssl-' . is_ssl();
