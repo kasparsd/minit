@@ -291,6 +291,33 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 }
 
 
+/**
+ * Add support for relative CSS imports
+ */
+add_filter( 'minit-item-css', 'minit_resolve_css_imports', 10, 3 );
+
+function minit_resolve_css_imports( $content, $object, $script ) {
+
+	if ( ! $content )
+		return $content;
+
+	$src = Minit::get_asset_relative_path( 
+			$object->base_url, 
+			$object->registered[ $script ]->src
+		);
+
+	// Make all import asset URLs absolute
+	$content = preg_replace( 
+			'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i', 
+			sprintf( "@import url('%s/$2')", $object->base_url . dirname( $src ) ), 
+			$content
+		);
+
+	return $content;
+
+}
+
+
 add_filter( 'minit-item-css', 'minit_exclude_css_with_media_query', 10, 3 );
 
 function minit_exclude_css_with_media_query( $content, $object, $script ) {
