@@ -14,6 +14,7 @@ $minit_instance = Minit::instance();
 class Minit {
 
 	static $instance;
+	private $minit_done = array();
 
 
 	private function __construct() {
@@ -52,7 +53,7 @@ class Minit {
 	}
 
 
-	function minit_objects( $object, $todo, $extension ) {
+	function minit_objects( &$object, $todo, $extension ) {
 
 		// Don't run if on admin or already processed
 		if ( is_admin() || empty( $todo ) )
@@ -60,13 +61,17 @@ class Minit {
 
 		// Allow files to be excluded from Minit
 		$minit_exclude = (array) apply_filters( 'minit-exclude-' . $extension, array() );
+
+		// Exluce all minit items by default
+		$minit_exclude = array_merge( $minit_exclude, $this->get_done() );
+
 		$minit_todo = array_diff( $todo, $minit_exclude );
 
 		$done = array();
 		$ver = array();
 
 		// Debug enable
-		//$ver[] = 'debug-' . time();
+		$ver[] = 'debug-' . time();
 
 		// Bust cache on Minit plugin update
 		$ver[] = 'minit-ver-0.9.2';
@@ -89,13 +94,21 @@ class Minit {
 		if ( isset( $cache['cache_ver'] ) && $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
 			return $this->minit_enqueue_files( $object, $cache );
 
-		foreach ( $minit_todo as $t => $script ) {
+		foreach ( $minit_todo as $script ) {
+
+			// Make sure this isn't us already
+			//if ( in_array( $script, $this->minits ) )
+			//	continue;
 
 			// Get the relative URL of the asset
 			$src = self::get_asset_relative_path( 
 					$object->base_url, 
 					$object->registered[ $script ]->src 
 				);
+
+			// Add support for pseudo packages such as jquery which return src as empty string
+			if ( empty( $object->registered[ $script ]->src ) || '' == $object->registered[ $script ]->src )
+				$done[ $script ] = null;
 
 			// Skip if the file is not hosted locally
 			if ( ! $src || ! file_exists( ABSPATH . $src ) )
@@ -149,12 +162,14 @@ class Minit {
 		// Cache this set of scripts for 24 hours
 		set_transient( 'minit-' . $cache_ver, $status, 24 * 60 * 60 );
 
+		$this->set_done( $cache_ver );
+
 		return $this->minit_enqueue_files( $object, $status );
 
 	}
 
 
-	function minit_enqueue_files( $object, $status ) {
+	function minit_enqueue_files( &$object, $status ) {
 
 		extract( $status );
 
@@ -186,13 +201,17 @@ class Minit {
 				wp_enqueue_script( 
 					'minit-' . $cache_ver, 
 					$url, 
-					null, 
+					null,
 					null,
 					apply_filters( 'minit-js-in-footer', true )
 				);
 
-				// Make sure that minit JS script is placed either in header/footer
-				$object->groups[ 'minit-' . $cache_ver ] = apply_filters( 'minit-js-in-footer', true );
+				// Add to the correct 
+				$object->set_group( 
+					'minit-' . $cache_ver, 
+					false, 
+					apply_filters( 'minit-js-in-footer', true ) 
+				);
 
 				// Add inline scripts for all minited scripts
 				foreach ( $done as $script ) {
@@ -209,22 +228,32 @@ class Minit {
 			default:
 
 				return $todo;
-
+		
 		}
 
 		// Remove scripts that were merged
 		$todo = array_diff( $todo, $done );
 
-		// This is necessary to print this out now
 		$todo[] = 'minit-' . $cache_ver;
-		
-		// Add remaining elements to the queue
-		$object->queue = $todo;
 
 		// Mark these items as done
 		$object->done = array_merge( $object->done, $done );
-	
+
 		return $todo;
+
+	}
+
+
+	function set_done( $handle ) {
+
+		$this->minit_done[] = 'minit-' . $handle;
+
+	}
+
+
+	function get_done() {
+
+		return $this->minit_done;
 
 	}
 
@@ -246,7 +275,6 @@ class Minit {
 		return $maybe_relative;
 
 	}
-
 
 }
 
@@ -335,6 +363,23 @@ function minit_exclude_css_with_media_query( $content, $object, $script ) {
 		return false;
 
 	return $content;
+
+}
+
+add_filter( 'minit-content-css', 'minit_add_toc', 100, 2 );
+add_filter( 'minit-content-js', 'minit_add_toc', 100, 2 );
+
+function minit_add_toc( $content, $items ) {
+
+	if ( ! $content || empty( $items ) )
+		return $content;
+
+	$toc = array();
+
+	foreach ( $items as $handle => $item_content )
+		$toc[] = sprintf( ' - %s', $handle ); 
+
+	return sprintf( "/* TOC:\n%s\n*/", implode( "\n", $toc ) ) . $content;
 
 }
 
