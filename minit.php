@@ -434,7 +434,7 @@ function minit_add_footer_scripts_async() {
 	if ( ! is_object( $wp_scripts ) )
 		return;
 
-	$wp_scripts->async = array();
+	$wp_scripts->minit_async = array();
 
 	if ( ! isset( $wp_scripts->queue ) || empty( $wp_scripts->queue ) )
 		return;
@@ -442,7 +442,7 @@ function minit_add_footer_scripts_async() {
 	foreach ( $wp_scripts->queue as $handle ) {
 		// Check if the script is external
 		if ( in_array( $handle, $wp_scripts->in_footer ) && preg_match( '|^(https?:)?//|', str_replace( home_url(), '', $wp_scripts->registered[$handle]->src ) ) ) {
-			$wp_scripts->async[] = $handle;
+			$wp_scripts->minit_async[] = $handle;
 			wp_dequeue_script( $handle );
 		}
 	}
@@ -455,7 +455,7 @@ function minit_print_footer_scripts_async() {
 
 	global $wp_scripts;
 
-	if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->async ) )
+	if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->minit_async ) )
 		return;
 
 	?>
@@ -472,8 +472,13 @@ function minit_print_footer_scripts_async() {
 				fjs.parentNode.insertBefore(js, fjs);
 			};
 		<?php 
-		foreach ( $wp_scripts->async as $handle )
-			printf( 'add("%s", "%s"); ', $wp_scripts->registered[$handle]->src, 'async-script-' . esc_attr( $handle ) ); 
+		foreach ( $wp_scripts->minit_async as $handle ) {
+			printf( 
+				'add("%s", "%s"); ', 
+				$wp_scripts->registered[$handle]->src, 
+				'async-script-' . esc_attr( $handle ) 
+			); 
+		}
 		?>
 	})();
 	</script>
