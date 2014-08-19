@@ -473,7 +473,7 @@ function minit_print_footer_scripts_async() {
 			};
 		<?php 
 		foreach ( $wp_scripts->async as $handle )
-			printf( 'add("%s", "%s"); ', $wp_scripts->registered[$handle]->src, 'async-script-' . $handle ); 
+			printf( 'add("%s", "%s"); ', $wp_scripts->registered[$handle]->src, 'async-script-' . esc_attr( $handle ) ); 
 		?>
 	})();
 	</script>
