@@ -23,7 +23,7 @@ class Minit {
 		add_filter( 'print_scripts_array', array( $this, 'init_minit_js' ) );
 		add_filter( 'print_styles_array', array( $this, 'init_minit_css' ) );
 
-		// Print external scripts asynchronously in the footer, using a method similar to Google Analytics
+		// Print external scripts asynchronously in the footer
 		add_action( 'wp_print_footer_scripts', array( $this, 'async_init' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( $this, 'async_print' ), 20 );
 
@@ -81,7 +81,7 @@ class Minit {
 		// Bust cache on Minit plugin update
 		$ver[] = 'minit-ver-0.9.2';
 
-		// DEBUG
+		// Debug enable
 		// $ver[] = 'debug-' . time();
 
 		// Use different cache key for SSL and non-SSL
