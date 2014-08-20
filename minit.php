@@ -74,7 +74,7 @@ class Minit {
 		$ver = array();
 
 		// Debug enable
-		$ver[] = 'debug-' . time();
+		// $ver[] = 'debug-' . time();
 
 		// Bust cache on Minit plugin update
 		$ver[] = 'minit-ver-0.9.2';
