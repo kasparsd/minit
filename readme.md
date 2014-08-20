@@ -3,7 +3,7 @@
 Contributors: kasparsd   
 Tags: css, js, combine, minify, concatenate, optimization, performance, speed   
 Requires at least: 3.1   
-Tested up to: 3.9   
+Tested up to: 4.0   
 Stable tag: trunk   
 License: GPLv2 or later   
 
@@ -22,6 +22,9 @@ TODO
 
 
 ## Changelog
+
+### 1.0
+* Refactor Minit logic. Fix double Minit with JS in the footer.
 
 ### 0.9
 * Refactor into a class.
