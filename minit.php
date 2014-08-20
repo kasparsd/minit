@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 0.9.2-dev.2
+Version: 0.9.2-dev.3
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -15,12 +15,17 @@ class Minit {
 
 	static $instance;
 	private $minit_done = array();
+	private $async_queue = array();
 
 
 	private function __construct() {
 		
 		add_filter( 'print_scripts_array', array( $this, 'init_minit_js' ) );
 		add_filter( 'print_styles_array', array( $this, 'init_minit_css' ) );
+
+		// Print external scripts asynchronously in the footer, using a method similar to Google Analytics
+		add_action( 'wp_print_footer_scripts', array( $this, 'async_init' ), 5 );
+		add_action( 'wp_print_footer_scripts', array( $this, 'async_print' ), 20 );
 
 	}
 
@@ -73,11 +78,11 @@ class Minit {
 		$done = array();
 		$ver = array();
 
-		// Debug enable
-		// $ver[] = 'debug-' . time();
-
 		// Bust cache on Minit plugin update
 		$ver[] = 'minit-ver-0.9.2';
+
+		// DEBUG
+		// $ver[] = 'debug-' . time();
 
 		// Use different cache key for SSL and non-SSL
 		$ver[] = 'is_ssl-' . is_ssl();
@@ -240,6 +245,9 @@ class Minit {
 		// Mark these items as done
 		$object->done = array_merge( $object->done, $done );
 
+		// Remove Minit items from the queue
+		$object->queue = array_diff( $object->queue, $done );
+
 		return $todo;
 
 	}
@@ -277,9 +285,76 @@ class Minit {
 
 	}
 
+
+	public function async_init() {
+
+		global $wp_scripts;
+
+		if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->queue ) )
+			return;
+
+		$base_url = site_url();
+
+		foreach ( $wp_scripts->queue as $handle ) {
+
+			$script_relative_path = Minit::get_asset_relative_path( 
+				$base_url, 
+				$wp_scripts->registered[$handle]->src
+			);
+
+			if ( ! $script_relative_path ) {
+				// Add this script to our async queue
+				$this->async_queue[] = $handle;
+
+				// Remove this script from being printed the regular way
+				wp_dequeue_script( $handle );
+			}
+
+		}
+
+	}
+
+
+	public function async_print() {
+
+		global $wp_scripts;
+
+		if ( empty( $this->async_queue ) )
+			return;
+
+		?>
+		<!-- Asynchronous scripts by Minit -->
+		<script id="minit-async-scripts" type="text/javascript">
+		(function() {
+			var js, fjs = document.getElementById('minit-async-scripts'),
+				add = function( url, id ) {
+					js = document.createElement('script'); 
+					js.type = 'text/javascript'; 
+					js.src = url; 
+					js.async = true; 
+					js.id = id;
+					fjs.parentNode.insertBefore(js, fjs);
+				};
+			<?php 
+			foreach ( $this->async_queue as $handle ) {
+				printf( 
+					'add("%s", "%s"); ', 
+					$wp_scripts->registered[$handle]->src, 
+					'async-script-' . esc_attr( $handle ) 
+				); 
+			}
+			?>
+		})();
+		</script>
+		<?php
+
+	}
+
+
 }
 
 
+// Prepend the filename of the file being included
 add_filter( 'minit-item-css', 'minit_comment_combined', 15, 3 );
 add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
 
@@ -296,9 +371,26 @@ function minit_comment_combined( $content, $object, $script ) {
 }
 
 
-/**
- * Turn all local asset URLs into absolute URLs
- */
+// Add table of contents at the top of the Minit file
+add_filter( 'minit-content-css', 'minit_add_toc', 100, 2 );
+add_filter( 'minit-content-js', 'minit_add_toc', 100, 2 );
+
+function minit_add_toc( $content, $items ) {
+
+	if ( ! $content || empty( $items ) )
+		return $content;
+
+	$toc = array();
+
+	foreach ( $items as $handle => $item_content )
+		$toc[] = sprintf( ' - %s', $handle ); 
+
+	return sprintf( "/* TOC:\n%s\n*/", implode( "\n", $toc ) ) . $content;
+
+}
+
+
+// Turn all local asset URLs into absolute URLs
 add_filter( 'minit-item-css', 'minit_resolve_css_urls', 10, 3 );
 
 function minit_resolve_css_urls( $content, $object, $script ) {
@@ -323,9 +415,7 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 }
 
 
-/**
- * Add support for relative CSS imports
- */
+// Add support for relative CSS imports
 add_filter( 'minit-item-css', 'minit_resolve_css_imports', 10, 3 );
 
 function minit_resolve_css_imports( $content, $object, $script ) {
@@ -350,6 +440,7 @@ function minit_resolve_css_imports( $content, $object, $script ) {
 }
 
 
+// Exclude styles with media queries from being included in Minit
 add_filter( 'minit-item-css', 'minit_exclude_css_with_media_query', 10, 3 );
 
 function minit_exclude_css_with_media_query( $content, $object, $script ) {
@@ -367,24 +458,8 @@ function minit_exclude_css_with_media_query( $content, $object, $script ) {
 
 }
 
-add_filter( 'minit-content-css', 'minit_add_toc', 100, 2 );
-add_filter( 'minit-content-js', 'minit_add_toc', 100, 2 );
 
-function minit_add_toc( $content, $items ) {
-
-	if ( ! $content || empty( $items ) )
-		return $content;
-
-	$toc = array();
-
-	foreach ( $items as $handle => $item_content )
-		$toc[] = sprintf( ' - %s', $handle ); 
-
-	return sprintf( "/* TOC:\n%s\n*/", implode( "\n", $toc ) ) . $content;
-
-}
-
-
+// Make sure that all Minit files are served from the correct protocol
 add_filter( 'minit-url-css', 'minit_maybe_ssl_url' );
 add_filter( 'minit-url-js', 'minit_maybe_ssl_url' );
 
@@ -398,9 +473,7 @@ function minit_maybe_ssl_url( $url ) {
 }
 
 
-/**
- * Add a Purge Cache link to the plugin list
- */
+// Add a Purge Cache link to the plugin list
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'minit_cache_purge_admin_link' );
 
 function minit_cache_purge_admin_link( $links ) {
@@ -463,78 +536,6 @@ function minit_cache_delete_files() {
 			unlink( $minit_file );
 		}
 	}
-
-}
-
-
-/**
- * Print external scripts asynchronously in the footer, using a method similar to Google Analytics
- */
-
-add_action( 'wp_print_footer_scripts', 'minit_add_footer_scripts_async', 5 );
-
-function minit_add_footer_scripts_async() {
-
-	global $wp_scripts;
-
-	if ( ! is_object( $wp_scripts ) )
-		return;
-
-	$wp_scripts->minit_async = array();
-
-	if ( ! isset( $wp_scripts->queue ) || empty( $wp_scripts->queue ) )
-		return;
-
-	foreach ( $wp_scripts->queue as $handle ) {
-
-		$script_relative_path = Minit::get_asset_relative_path( 
-			site_url(), 
-			$wp_scripts->registered[$handle]->src
-		);
-
-		if ( in_array( $handle, $wp_scripts->in_footer ) && ! $script_relative_path ) {
-			$wp_scripts->minit_async[] = $handle;
-			wp_dequeue_script( $handle );
-		}
-
-	}
-
-}
-
-add_action( 'wp_print_footer_scripts', 'minit_print_footer_scripts_async', 20 );
-
-function minit_print_footer_scripts_async() {
-
-	global $wp_scripts;
-
-	if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->minit_async ) )
-		return;
-
-	?>
-	<!-- Asynchronous scripts by Minit -->
-	<script id="minit-async-scripts" type="text/javascript">
-	(function() {
-		var js, fjs = document.getElementById('minit-async-scripts'),
-			add = function( url, id ) {
-				js = document.createElement('script'); 
-				js.type = 'text/javascript'; 
-				js.src = url; 
-				js.async = true; 
-				js.id = id;
-				fjs.parentNode.insertBefore(js, fjs);
-			};
-		<?php 
-		foreach ( $wp_scripts->minit_async as $handle ) {
-			printf( 
-				'add("%s", "%s"); ', 
-				$wp_scripts->registered[$handle]->src, 
-				'async-script-' . esc_attr( $handle ) 
-			); 
-		}
-		?>
-	})();
-	</script>
-	<?php
 
 }
 
