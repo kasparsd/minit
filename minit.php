@@ -38,7 +38,7 @@ class Minit {
 	function init_minit_js( $todo ) {
 
 		global $wp_scripts;
-		
+
 		return $this->minit_objects( $wp_scripts, $todo, 'js' );
 
 	}
@@ -66,6 +66,9 @@ class Minit {
 		$minit_exclude = array_merge( $minit_exclude, $this->get_done() );
 
 		$minit_todo = array_diff( $todo, $minit_exclude );
+
+		if ( empty( $minit_todo ) )
+			return $todo;
 
 		$done = array();
 		$ver = array();
@@ -95,10 +98,6 @@ class Minit {
 			return $this->minit_enqueue_files( $object, $cache );
 
 		foreach ( $minit_todo as $script ) {
-
-			// Make sure this isn't us already
-			//if ( in_array( $script, $this->minits ) )
-			//	continue;
 
 			// Get the relative URL of the asset
 			$src = self::get_asset_relative_path( 
@@ -213,15 +212,17 @@ class Minit {
 					apply_filters( 'minit-js-in-footer', true ) 
 				);
 
+				$inline_data = array();
+
 				// Add inline scripts for all minited scripts
-				foreach ( $done as $script ) {
-					
-					$inline_script = $object->get_data( $script, 'data' );
+				foreach ( $done as $script )
+					$inline_data[] = $object->get_data( $script, 'data' );
 
-					if ( ! empty( $inline_script ) )
-						$object->add_data( 'minit-' . $cache_ver, 'data', $inline_script );
+				// Filter out empty elements
+				$inline_data = array_filter( $inline_data );
 
-				}
+				if ( ! empty( $inline_data ) )
+					$object->add_data( 'minit-' . $cache_ver, 'data', implode( "\n", $inline_data ) );
 				
 				break;
 			
