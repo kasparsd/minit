@@ -294,11 +294,11 @@ class Minit {
 			return;
 
 		$base_url = site_url();
+		$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
 
 		foreach ( $wp_scripts->queue as $handle ) {
 
 			// Skip asyncing explicitly excluded script handles
-			$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
 			if ( in_array( $handle, $minit_exclude ) ) {
 				continue;
 			}
