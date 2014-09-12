@@ -297,8 +297,14 @@ class Minit {
 
 		foreach ( $wp_scripts->queue as $handle ) {
 
-			$script_relative_path = Minit::get_asset_relative_path( 
-				$base_url, 
+			// Skip asyncing explicitly excluded script handles
+			$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
+			if ( in_array( $handle, $minit_exclude ) ) {
+				continue;
+			}
+
+			$script_relative_path = Minit::get_asset_relative_path(
+				$base_url,
 				$wp_scripts->registered[$handle]->src
 			);
 
