@@ -19,7 +19,7 @@ class Minit {
 
 
 	private function __construct() {
-		
+
 		add_filter( 'print_scripts_array', array( $this, 'init_minit_js' ) );
 		add_filter( 'print_styles_array', array( $this, 'init_minit_css' ) );
 
@@ -52,7 +52,7 @@ class Minit {
 	function init_minit_css( $todo ) {
 
 		global $wp_styles;
-		
+
 		return $this->minit_objects( $wp_styles, $todo, 'css' );
 
 	}
@@ -98,16 +98,16 @@ class Minit {
 
 		// Try to get queue from cache
 		$cache = get_transient( 'minit-' . $cache_ver );
-		
+
 		if ( isset( $cache['cache_ver'] ) && $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
 			return $this->minit_enqueue_files( $object, $cache );
 
 		foreach ( $minit_todo as $script ) {
 
 			// Get the relative URL of the asset
-			$src = self::get_asset_relative_path( 
-					$object->base_url, 
-					$object->registered[ $script ]->src 
+			$src = self::get_asset_relative_path(
+					$object->base_url,
+					$object->registered[ $script ]->src
 				);
 
 			// Add support for pseudo packages such as jquery which return src as empty string
@@ -118,8 +118,8 @@ class Minit {
 			if ( ! $src || ! file_exists( ABSPATH . $src ) )
 				continue;
 
-			$script_content = apply_filters( 
-					'minit-item-' . $extension, 
+			$script_content = apply_filters(
+					'minit-item-' . $extension,
 					file_get_contents( ABSPATH . $src ),
 					$object,
 					$script
@@ -180,17 +180,17 @@ class Minit {
 		switch ( $extension ) {
 
 			case 'css':
-				
-				wp_enqueue_style( 
-					'minit-' . $cache_ver, 
-					$url, 
-					null, 
+
+				wp_enqueue_style(
+					'minit-' . $cache_ver,
+					$url,
+					null,
 					null
 				);
 
 				// Add inline styles for all minited styles
 				foreach ( $done as $script ) {
-					
+
 					$inline_style = $object->get_data( $script, 'after' );
 
 					if ( ! empty( $inline_style ) )
@@ -202,19 +202,19 @@ class Minit {
 
 			case 'js':
 
-				wp_enqueue_script( 
-					'minit-' . $cache_ver, 
-					$url, 
+				wp_enqueue_script(
+					'minit-' . $cache_ver,
+					$url,
 					null,
 					null,
 					apply_filters( 'minit-js-in-footer', true )
 				);
 
-				// Add to the correct 
-				$object->set_group( 
-					'minit-' . $cache_ver, 
-					false, 
-					apply_filters( 'minit-js-in-footer', true ) 
+				// Add to the correct
+				$object->set_group(
+					'minit-' . $cache_ver,
+					false,
+					apply_filters( 'minit-js-in-footer', true )
 				);
 
 				$inline_data = array();
@@ -228,13 +228,13 @@ class Minit {
 
 				if ( ! empty( $inline_data ) )
 					$object->add_data( 'minit-' . $cache_ver, 'data', implode( "\n", $inline_data ) );
-				
+
 				break;
-			
+
 			default:
 
 				return $todo;
-		
+
 		}
 
 		// Remove scripts that were merged
@@ -328,20 +328,20 @@ class Minit {
 		(function() {
 			var js, fjs = document.getElementById('minit-async-scripts'),
 				add = function( url, id ) {
-					js = document.createElement('script'); 
-					js.type = 'text/javascript'; 
-					js.src = url; 
-					js.async = true; 
+					js = document.createElement('script');
+					js.type = 'text/javascript';
+					js.src = url;
+					js.async = true;
 					js.id = id;
 					fjs.parentNode.insertBefore(js, fjs);
 				};
-			<?php 
+			<?php
 			foreach ( $this->async_queue as $handle ) {
-				printf( 
-					'add("%s", "%s"); ', 
-					$wp_scripts->registered[$handle]->src, 
-					'async-script-' . esc_attr( $handle ) 
-				); 
+				printf(
+					'add("%s", "%s"); ',
+					$wp_scripts->registered[$handle]->src,
+					'async-script-' . esc_attr( $handle )
+				);
 			}
 			?>
 		})();
@@ -364,7 +364,7 @@ function minit_comment_combined( $content, $object, $script ) {
 		return $content;
 
 	return sprintf(
-			"\n\n/* Minit: %s */\n", 
+			"\n\n/* Minit: %s */\n",
 			$object->registered[ $script ]->src
 		) . $content;
 
@@ -383,7 +383,7 @@ function minit_add_toc( $content, $items ) {
 	$toc = array();
 
 	foreach ( $items as $handle => $item_content )
-		$toc[] = sprintf( ' - %s', $handle ); 
+		$toc[] = sprintf( ' - %s', $handle );
 
 	return sprintf( "/* TOC:\n%s\n*/", implode( "\n", $toc ) ) . $content;
 
@@ -398,15 +398,15 @@ function minit_resolve_css_urls( $content, $object, $script ) {
 	if ( ! $content )
 		return $content;
 
-	$src = Minit::get_asset_relative_path( 
-			$object->base_url, 
+	$src = Minit::get_asset_relative_path(
+			$object->base_url,
 			$object->registered[ $script ]->src
 		);
 
 	// Make all local asset URLs absolute
-	$content = preg_replace( 
+	$content = preg_replace(
 			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-			sprintf( "url('%s/$1')", $object->base_url . dirname( $src ) ), 
+			sprintf( "url('%s/$1')", $object->base_url . dirname( $src ) ),
 			$content
 		);
 
@@ -423,15 +423,15 @@ function minit_resolve_css_imports( $content, $object, $script ) {
 	if ( ! $content )
 		return $content;
 
-	$src = Minit::get_asset_relative_path( 
-			$object->base_url, 
+	$src = Minit::get_asset_relative_path(
+			$object->base_url,
 			$object->registered[ $script ]->src
 		);
 
 	// Make all import asset URLs absolute
-	$content = preg_replace( 
-			'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i', 
-			sprintf( "@import url('%s/$2')", $object->base_url . dirname( $src ) ), 
+	$content = preg_replace(
+			'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i',
+			sprintf( "@import url('%s/$2')", $object->base_url . dirname( $src ) ),
 			$content
 		);
 
@@ -478,10 +478,10 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'minit_cache_p
 
 function minit_cache_purge_admin_link( $links ) {
 
-	$links[] = sprintf( 
-			'<a href="%s">%s</a>', 
-			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ), 
-			__( 'Purge cache', 'minit' ) 
+	$links[] = sprintf(
+			'<a href="%s">%s</a>',
+			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ),
+			__( 'Purge cache', 'minit' )
 		);
 
 	return $links;
@@ -515,9 +515,9 @@ function purge_minit_cache() {
 
 function minit_cache_purged_success() {
 
-	printf( 
-		'<div class="updated"><p>%s</p></div>', 
-		__( 'Success: Minit cache purged.', 'minit' ) 
+	printf(
+		'<div class="updated"><p>%s</p></div>',
+		__( 'Success: Minit cache purged.', 'minit' )
 	);
 
 }
