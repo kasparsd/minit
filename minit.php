@@ -193,12 +193,16 @@ class Minit {
 
 					$inline_styles = $object->get_data( $script, 'after' );
 
-					foreach ( $inline_styles as $inline_style ) {
+					if ( ! empty( $inline_styles ) ) {
+
+						foreach ( $inline_styles as $inline_style ) {
 						
-						if ( ! empty( $inline_style ) )
 							$object->add_inline_style( 'minit-' . $cache_ver, $inline_style );
 
+						}
+
 					}
+
 				}
 
 				break;
