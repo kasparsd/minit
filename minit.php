@@ -125,8 +125,15 @@ class Minit {
 					$script
 				);
 
-			if ( false !== $script_content )
+			if ( false !== $script_content ) {
+				global $wp_scripts;
+				//Get localized and custom data for scripts
+				$script_data = $wp_scripts->get_data( $script, 'data' );
+				if ( false !== $script_data ) $script_content = $script_data . $script_content;
+				
+				//Save content to array
 				$done[ $script ] = $script_content;
+			}
 
 		}
 
@@ -216,18 +223,6 @@ class Minit {
 					false,
 					apply_filters( 'minit-js-in-footer', true )
 				);
-
-				$inline_data = array();
-
-				// Add inline scripts for all minited scripts
-				foreach ( $done as $script )
-					$inline_data[] = $object->get_data( $script, 'data' );
-
-				// Filter out empty elements
-				$inline_data = array_filter( $inline_data );
-
-				if ( ! empty( $inline_data ) )
-					$object->add_data( 'minit-' . $cache_ver, 'data', implode( "\n", $inline_data ) );
 
 				break;
 
