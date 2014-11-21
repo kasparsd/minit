@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 1.0
+Version: 1.1
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -193,8 +193,13 @@ class Minit {
 
 					$inline_style = $object->get_data( $script, 'after' );
 
-					if ( ! empty( $inline_style ) )
+					if ( empty( $inline_style ) )
+						continue;
+
+					if ( is_string( $inline_style ) )
 						$object->add_inline_style( 'minit-' . $cache_ver, $inline_style );
+					elseif ( is_array( $inline_style ) )
+						$object->add_inline_style( 'minit-' . $cache_ver, implode( ' ', $inline_style ) );
 
 				}
 
