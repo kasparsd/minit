@@ -7,7 +7,7 @@ Tested up to: 4.4
 Stable tag: trunk   
 License: GPLv2 or later   
 
-Combine CSS files and Javascript files into single file in the correct order. Use the latest modified time in filename generation to ensure freshness. Load all external Javascript files asynchronosly.
+Combine CSS files and Javascript files into single file in the correct order. Use the latest modified time in filename generation to ensure freshness. Load all external Javascript files asynchronously.
 
 
 ## Description
@@ -18,13 +18,13 @@ TODO
 ## Screenshots
 
 1. All CSS files combined in a single file
-2. All external Javascript files loading asynchronosly
+2. All external Javascript files loading asynchronously
 
 
 ## Changelog
 
 ### 1.2
-* Add Minit JS using async
+* Add Minit JS using async.
 
 ### 1.1
 * Add support for multiple inline CSS data.
