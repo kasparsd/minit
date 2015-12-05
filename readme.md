@@ -3,7 +3,7 @@
 Contributors: kasparsd   
 Tags: css, js, combine, minify, concatenate, optimization, performance, speed   
 Requires at least: 3.1   
-Tested up to: 4.0.1   
+Tested up to: 4.4   
 Stable tag: trunk   
 License: GPLv2 or later   
 
@@ -22,6 +22,9 @@ TODO
 
 
 ## Changelog
+
+### 1.2
+* Add Minit JS using async
 
 ### 1.1
 * Add support for multiple inline CSS data.

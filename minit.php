@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 1.1
+Version: 1.2
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -13,9 +13,8 @@ $minit_instance = Minit::instance();
 
 class Minit {
 
-	static $instance;
-	private $minit_done = array();
-	private $async_queue = array();
+	protected $minit_done = array();
+	protected $async_queue = array();
 
 
 	private function __construct() {
@@ -27,15 +26,19 @@ class Minit {
 		add_action( 'wp_print_footer_scripts', array( $this, 'async_init' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( $this, 'async_print' ), 20 );
 
+		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
+
 	}
 
 
 	public static function instance() {
 
-		if ( ! self::$instance )
-			self::$instance = new Minit();
+		static $instance;
 
-		return self::$instance;
+		if ( ! $instance )
+			$instance = new Minit();
+
+		return $instance;
 
 	}
 
@@ -65,7 +68,10 @@ class Minit {
 			return $todo;
 
 		// Allow files to be excluded from Minit
-		$minit_exclude = (array) apply_filters( 'minit-exclude-' . $extension, array() );
+		$minit_exclude = apply_filters( 'minit-exclude-' . $extension, array() );
+
+		if ( ! is_array( $minit_exclude ) )
+			$minit_exclude = array();
 
 		// Exluce all minit items by default
 		$minit_exclude = array_merge( $minit_exclude, $this->get_done() );
@@ -79,10 +85,11 @@ class Minit {
 		$ver = array();
 
 		// Bust cache on Minit plugin update
-		$ver[] = 'minit-ver-1.0.0';
+		$ver[] = 'minit-ver-1.2';
 
 		// Debug enable
-		// $ver[] = 'debug-' . time();
+		// if ( defined( 'WP_DEBUG' ) && WP_DEBUG )
+		//	$ver[] = 'debug-' . time();
 
 		// Use different cache key for SSL and non-SSL
 		$ver[] = 'is_ssl-' . is_ssl();
@@ -359,6 +366,24 @@ class Minit {
 		})();
 		</script>
 		<?php
+
+	}
+
+	public function script_tag_async( $tag, $handle, $src ) {
+
+		// Allow others to disable this feature
+		if ( ! apply_filters( 'minit-script-tag-async', true ) )
+			return $tag;
+
+		// Do this for minit scripts only
+		if ( false === stripos( $handle, 'minit-' ) )
+			return $tag;
+
+		// Bail if async is already set
+		if ( false !== stripos( $tag, ' async' ) )
+			return $tag;
+
+		return str_ireplace( '<script ', '<script async ', $tag );
 
 	}
 
