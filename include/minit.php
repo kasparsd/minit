@@ -15,6 +15,11 @@ class Minit {
 		'js' => array(),
 	);
 
+	protected $extension_map = array(
+		'WP_Styles' => 'css',
+		'WP_Scripts' => 'js',
+	);
+
 
 	public function __construct( $plugin ) {
 
@@ -98,12 +103,39 @@ class Minit {
 
 	function get_object_extension( $object ) {
 
-		if ( is_a( $object, 'WP_Styles' ) )
-			return 'css';
-		elseif ( is_a( $object, 'WP_Scripts' ) )
-			return 'js';
+		$class = get_class( $object );
 
-		return get_class( $object );
+		if ( empty( $class ) )
+			return false;
+
+		if ( isset( $this->extension_map[ $class ] ) )
+			return $this->extension_map[ $class ];
+
+		return $class;
+
+	}
+
+
+	function get_queue( $object ) {
+
+		$extension = $this->get_object_extension( $object );
+
+		if ( isset( $this->queue[ $extension ] ) )
+			return $this->queue[ $extension ];
+
+		return array();
+
+	}
+
+
+	function get_done( $object ) {
+
+		$extension = $this->get_object_extension( $object );
+
+		if ( isset( $this->done[ $extension ] ) )
+			return $this->done[ $extension ];
+
+		return array();
 
 	}
 
@@ -112,11 +144,10 @@ class Minit {
 
 		$done = array();
 		$extension = $this->get_object_extension( $object );
+		$todo = $this->get_queue( $object );
 
-		if ( ! isset( $this->queue[ $extension ] ) )
+		if ( empty( $todo ) )
 			return false;
-
-		$todo = $this->queue[ $extension ];
 
 		// Build a cache key
 		$ver = array(
@@ -229,35 +260,35 @@ class Minit {
 		global $wp_scripts;
 
 		// Run this only in the footer
-		if ( 0 !== $wp_scripts->group )
+		if ( 1 !== $wp_scripts->group )
 			return $todo;
 
-		if ( empty( $this->queue[ 'js' ] ) )
+		$queue = $this->get_queue( $wp_scripts );
+
+		if ( empty( $queue ) )
 			return $todo;
 
 		$handle = 'minit-js';
 		$url = $this->minit_assets( $wp_scripts );
 
 		if ( empty( $url ) ) {
-			return false;
+			return $todo;
 		}
 
-		// Remove Minited items from the queue
-		$todo = array_diff( $todo, $this->done[ 'js' ] );
-
 		// @todo create a fallback for apply_filters( 'minit-js-in-footer', true )
-		wp_register_script( $handle, $url, null, null, true );
+		wp_enqueue_script( $handle, $url, null, null, true );
 
-		// Add our minit script to the queue because wp_register_script is too late already
+		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = $handle;
 
+		$done = $this->get_done( $wp_scripts );
 		$inline_data = array();
 
 		// Add inline scripts for all minited scripts
-		foreach ( $this->done[ 'js' ] as $script )
+		foreach ( $done as $script )
 			$inline_data[] = $wp_scripts->get_data( $script, 'data' );
 
-		// Filter out empty elements
+		// Remove empty elements
 		$inline_data = array_filter( $inline_data );
 
 		if ( ! empty( $inline_data ) )
@@ -279,23 +310,23 @@ class Minit {
 			return $todo;
 		}
 
-		// Remove Minited items from the queue
-		$todo = array_diff( $todo, $this->queue[ 'css' ] );
+		wp_enqueue_style( $handle, $url, null, null );
 
-		wp_register_style( $handle, $url, null, null );
-
-		// Add our minit script to the queue because wp_register_style is too late already
+		// Add our Minit style since wp_enqueue_script won't do it at this point
 		$todo[] = $handle;
 
+		$done = $this->get_done( $wp_styles );
+		$inline_data = array();
+
 		// Add inline styles for all minited styles
-		foreach ( $this->done[ 'css' ] as $script ) {
+		foreach ( $done as $script )
+			$inline_data[] = implode( "\n", $wp_styles->get_data( $script, 'after' ) );
 
-			$extras = $wp_styles->get_data( $script, 'after' );
+		// Remove empty elements
+		$inline_data = array_filter( $inline_data );
 
-			if ( ! empty( $extras ) )
-				$wp_styles->add_data( $handle, 'after', $extras );
-
-		}
+		if ( ! empty( $inline_data ) )
+			$wp_styles->add_inline_style( $handle, implode( "\n", $inline_data ) );
 
 		return $todo;
 
