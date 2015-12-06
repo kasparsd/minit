@@ -117,3 +117,16 @@ function minit_maybe_ssl_url( $url ) {
 	return $url;
 
 }
+
+// Exclude handles that are known to cause problems
+add_filter( 'minit-exclude-js', 'minit_exclude_defaults' );
+
+function minit_exclude_defaults( $handles ) {
+
+	$exclude = array(
+		'grofiles-cards', // Jetpack Gravatar module 
+	);
+
+	return array_merge( $handles, $exclude );
+
+}
