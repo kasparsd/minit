@@ -278,15 +278,20 @@ class Minit {
 		$todo[] = $handle;
 
 		$done = $this->get_done( $wp_scripts );
+		$inline_js = array();
 
 		// Add inline scripts for all minited scripts
 		foreach ( $done as $script ) {
-			$inline_js = $wp_scripts->get_data( $script, 'data' );
 
-			if ( ! empty( $inline_js ) )
-				$wp_scripts->add_data( $script, 'data', $inline_js );
+			$extra = $wp_scripts->get_data( $script, 'data' );
+
+			if ( ! empty( $extra ) )
+				$inline_js[] = $extra;
 
 		}
+
+		if ( ! empty( $inline_js ) )
+			$wp_scripts->add_data( $handle, 'data', implode( "\n", $inline_js ) );
 
 		return $todo;
 
@@ -313,11 +318,13 @@ class Minit {
 
 		// Add inline styles for all minited styles
 		foreach ( $done as $script ) {
+
 			// Can this return an array instead?
 			$inline_styles = $wp_styles->get_data( $script, 'after' );
 
 			if ( ! empty( $inline_styles ) )
 				$wp_styles->add_inline_style( $handle, implode( "\n", $inline_styles ) );
+
 		}
 
 		return $todo;
