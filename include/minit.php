@@ -34,10 +34,10 @@ class Minit {
 		add_filter( 'print_scripts_array', array( $this, 'register_js' ) );
 		add_filter( 'print_styles_array', array( $this, 'register_css' ) );
 
-		// Enqueue all registered Minit styles
+		// Print our CSS files
 		add_filter( 'print_styles_array', array( $this, 'minit_css' ), 20 );
 
-		// Enqueue all registered Minit scripts in the footer
+		// Print our JS file
 		add_filter( 'print_scripts_array', array( $this, 'minit_js' ), 20 );
 
 		// Print external scripts asynchronously in the footer
@@ -96,7 +96,10 @@ class Minit {
 			if ( ! in_array( $handle, $this->queue[ $extension ] ) )
 				$this->queue[ $extension ][] = $handle;
 
-		return array_diff( $todo, $this->queue[ $extension ] );
+		// Mark these as done since we'll take care of them
+		$object->done = array_merge( $object->done, $this->queue[ $extension ] );
+
+		return $todo;
 
 	}
 
@@ -157,9 +160,9 @@ class Minit {
 			'minit_cache_ver-' . get_option( 'minit_cache_ver' ), // Use a global cache version key to purge cache
 		);
 
-		// Include individual scripts version in the cache key
-		foreach ( $todo as $script )
-			$ver[] = sprintf( '%s-%s', $script, $object->registered[ $script ]->ver );
+		// Include individual scripts versions in the cache key
+		foreach ( $todo as $handle )
+			$ver[] = sprintf( '%s-%s', $handle, $object->registered[ $handle ]->ver );
 
 		$cache_ver = md5( 'minit-' . implode( '-', $ver ) );
 
@@ -250,8 +253,6 @@ class Minit {
 		// Mark them as processed by Minit
 		$this->done[ $extension ] = array_merge( $this->done[ $extension ], $handles );
 
-		$object->dequeue( $handles );
-
 	}
 
 
@@ -260,12 +261,7 @@ class Minit {
 		global $wp_scripts;
 
 		// Run this only in the footer
-		if ( 1 !== $wp_scripts->group )
-			return $todo;
-
-		$queue = $this->get_queue( $wp_scripts );
-
-		if ( empty( $queue ) )
+		if ( 0 !== $wp_scripts->group )
 			return $todo;
 
 		$handle = 'minit-js';
@@ -276,23 +272,21 @@ class Minit {
 		}
 
 		// @todo create a fallback for apply_filters( 'minit-js-in-footer', true )
-		wp_enqueue_script( $handle, $url, null, null, true );
+		wp_register_script( $handle, $url, null, null, true );
 
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = $handle;
 
 		$done = $this->get_done( $wp_scripts );
-		$inline_data = array();
 
 		// Add inline scripts for all minited scripts
-		foreach ( $done as $script )
-			$inline_data[] = $wp_scripts->get_data( $script, 'data' );
+		foreach ( $done as $script ) {
+			$inline_js = $wp_scripts->get_data( $script, 'data' );
 
-		// Remove empty elements
-		$inline_data = array_filter( $inline_data );
+			if ( ! empty( $inline_js ) )
+				$wp_scripts->add_data( $script, 'data', $inline_js );
 
-		if ( ! empty( $inline_data ) )
-			$wp_scripts->add_data( $handle, 'data', implode( "\n", $inline_data ) );
+		}
 
 		return $todo;
 
@@ -316,17 +310,15 @@ class Minit {
 		$todo[] = $handle;
 
 		$done = $this->get_done( $wp_styles );
-		$inline_data = array();
 
 		// Add inline styles for all minited styles
-		foreach ( $done as $script )
-			$inline_data[] = implode( "\n", $wp_styles->get_data( $script, 'after' ) );
+		foreach ( $done as $script ) {
+			// Can this return an array instead?
+			$inline_styles = $wp_styles->get_data( $script, 'after' );
 
-		// Remove empty elements
-		$inline_data = array_filter( $inline_data );
-
-		if ( ! empty( $inline_data ) )
-			$wp_styles->add_inline_style( $handle, implode( "\n", $inline_data ) );
+			if ( ! empty( $inline_styles ) )
+				$wp_styles->add_inline_style( $handle, implode( "\n", $inline_styles ) );
+		}
 
 		return $todo;
 
