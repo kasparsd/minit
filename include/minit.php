@@ -2,19 +2,43 @@
 
 class Minit {
 
-	protected $minit_done = array();
-	protected $async_queue = array();
+	protected static $instance;
+	protected $plugin;
+
+	protected $queue = array(
+		'css' => array(),
+		'js' => array(),
+	);
+
+	protected $done = array(
+		'css' => array(),
+		'js' => array(),
+	);
 
 
-	private function __construct() {
+	public function __construct( $plugin ) {
 
-		add_filter( 'print_scripts_array', array( $this, 'init_minit_js' ) );
-		add_filter( 'print_styles_array', array( $this, 'init_minit_css' ) );
+		$this->plugin = $plugin;
+
+	}
+
+
+	public function hook() {
+
+		// Queue all assets
+		add_filter( 'print_scripts_array', array( $this, 'register_js' ) );
+		add_filter( 'print_styles_array', array( $this, 'register_css' ) );
+
+		// Enqueue all registered Minit styles
+		add_filter( 'print_styles_array', array( $this, 'minit_css' ), 20 );
+
+		// Enqueue all registered Minit scripts in the footer
+		add_filter( 'print_scripts_array', array( $this, 'minit_js' ), 20 );
 
 		// Print external scripts asynchronously in the footer
-		add_action( 'wp_print_footer_scripts', array( $this, 'async_init' ), 5 );
-		add_action( 'wp_print_footer_scripts', array( $this, 'async_print' ), 20 );
+		add_action( 'wp_print_footer_scripts', array( $this, 'print_async_scripts' ), 20 );
 
+		// Load our JS files asynchronously
 		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
 
 	}
@@ -22,39 +46,35 @@ class Minit {
 
 	public static function instance() {
 
-		static $instance;
-
-		if ( ! $instance )
-			$instance = new Minit();
-
-		return $instance;
+		return self::$instance;
 
 	}
 
 
-	function init_minit_js( $todo ) {
+	function register_js( $todo ) {
 
 		global $wp_scripts;
 
-		return $this->minit_objects( $wp_scripts, $todo, 'js' );
+		return $this->register_assets( $wp_scripts, $todo );
 
 	}
 
 
-	function init_minit_css( $todo ) {
+	function register_css( $todo ) {
 
 		global $wp_styles;
 
-		return $this->minit_objects( $wp_styles, $todo, 'css' );
+		return $this->register_assets( $wp_styles, $todo );
 
 	}
 
 
-	function minit_objects( &$object, $todo, $extension ) {
+	function register_assets( $object, $todo ) {
 
-		// Don't run if on admin or already processed
-		if ( is_admin() || empty( $todo ) )
+		if ( empty( $todo ) )
 			return $todo;
+
+		$extension = $this->get_object_extension( $object );
 
 		// Allow files to be excluded from Minit
 		$minit_exclude = apply_filters( 'minit-exclude-' . $extension, array() );
@@ -62,79 +82,101 @@ class Minit {
 		if ( ! is_array( $minit_exclude ) )
 			$minit_exclude = array();
 
-		// Exluce all minit items by default
-		$minit_exclude = array_merge( $minit_exclude, $this->get_done() );
-
 		$minit_todo = array_diff( $todo, $minit_exclude );
 
 		if ( empty( $minit_todo ) )
 			return $todo;
 
+		foreach ( $minit_todo as $handle )
+			if ( ! in_array( $handle, $this->queue[ $extension ] ) )
+				$this->queue[ $extension ][] = $handle;
+
+		return array_diff( $todo, $this->queue[ $extension ] );
+
+	}
+
+
+	function get_object_extension( $object ) {
+
+		if ( is_a( $object, 'WP_Styles' ) )
+			return 'css';
+		elseif ( is_a( $object, 'WP_Scripts' ) )
+			return 'js';
+
+		return get_class( $object );
+
+	}
+
+
+	function minit_assets( $object ) {
+
 		$done = array();
-		$ver = array();
+		$extension = $this->get_object_extension( $object );
 
-		// Bust cache on Minit plugin update
-		$ver[] = 'minit-ver-1.2';
+		if ( ! isset( $this->queue[ $extension ] ) )
+			return false;
 
-		// Debug enable
-		// if ( defined( 'WP_DEBUG' ) && WP_DEBUG )
-		//	$ver[] = 'debug-' . time();
+		$todo = $this->queue[ $extension ];
 
-		// Use different cache key for SSL and non-SSL
-		$ver[] = 'is_ssl-' . is_ssl();
+		// Build a cache key
+		$ver = array(
+			$this->plugin->version,
+			$extension,
+			'is_ssl-' . is_ssl(), // Use different cache key for SSL and non-SSL
+			'minit_cache_ver-' . get_option( 'minit_cache_ver' ), // Use a global cache version key to purge cache
+		);
 
-		// Use a global cache version key to purge cache
-		$ver[] = 'minit_cache_ver-' . get_option( 'minit_cache_ver' );
-
-		// Use script version to generate a cache key
-		foreach ( $minit_todo as $t => $script )
+		// Include individual scripts version in the cache key
+		foreach ( $todo as $script )
 			$ver[] = sprintf( '%s-%s', $script, $object->registered[ $script ]->ver );
 
-		$cache_ver = md5( 'minit-' . implode( '-', $ver ) . $extension );
+		$cache_ver = md5( 'minit-' . implode( '-', $ver ) );
 
 		// Try to get queue from cache
 		$cache = get_transient( 'minit-' . $cache_ver );
 
-		if ( isset( $cache['cache_ver'] ) && $cache['cache_ver'] == $cache_ver && file_exists( $cache['file'] ) )
-			return $this->minit_enqueue_files( $object, $cache );
+		if ( ! empty( $cache ) && isset( $cache['url'] ) ) {
+			$this->mark_done( $cache['done'], $object );
 
-		foreach ( $minit_todo as $script ) {
+			return $cache['url'];
+		}
+
+		foreach ( $todo as $script ) {
+
+			// Ignore pseudo packages such as jquery which return src as empty string
+			if ( empty( $object->registered[ $script ]->src ) )
+				$done[ $script ] = null;
 
 			// Get the relative URL of the asset
-			$src = self::get_asset_relative_path(
+			$src = $this->get_asset_relative_path(
 					$object->base_url,
 					$object->registered[ $script ]->src
 				);
 
-			// Add support for pseudo packages such as jquery which return src as empty string
-			if ( empty( $object->registered[ $script ]->src ) || '' == $object->registered[ $script ]->src )
-				$done[ $script ] = null;
-
 			// Skip if the file is not hosted locally
-			if ( ! $src || ! file_exists( ABSPATH . $src ) )
+			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) )
 				continue;
 
-			$script_content = apply_filters(
+			$done[ $script ] = apply_filters(
 					'minit-item-' . $extension,
 					file_get_contents( ABSPATH . $src ),
 					$object,
 					$script
 				);
 
-			if ( false !== $script_content )
-				$done[ $script ] = $script_content;
-
 		}
 
 		if ( empty( $done ) )
-			return $todo;
+			return false;
+
+		$this->mark_done( array_keys( $done ), $object );
 
 		$wp_upload_dir = wp_upload_dir();
 
 		// Try to create the folder for cache
 		if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit' ) )
 			if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) )
-				return $todo;
+				return false;
 
 		$combined_file_path = sprintf( '%s/minit/%s.%s', $wp_upload_dir['basedir'], $cache_ver, $extension );
 		$combined_file_url = sprintf( '%s/minit/%s.%s', $wp_upload_dir['baseurl'], $cache_ver, $extension );
@@ -148,123 +190,119 @@ class Minit {
 		// Store the combined file on the filesystem
 		if ( ! file_exists( $combined_file_path ) )
 			if ( ! file_put_contents( $combined_file_path, $done_imploded ) )
-				return $todo;
-
-		$status = array(
-				'cache_ver' => $cache_ver,
-				'todo' => $todo,
-				'done' => array_keys( $done ),
-				'url' => $combined_file_url,
-				'file' => $combined_file_path,
-				'extension' => $extension
-			);
+				return false;
 
 		// Cache this set of scripts, by default for 24 hours
-		$cache_expiration = apply_filters( 'minit-cache-expiration', 24 * 60 * 60 );
-		set_transient( 'minit-' . $cache_ver, $status, $cache_expiration );
+		$cache_ttl = apply_filters( 'minit-cache-expiration', 24 * 60 * 60 );
+		$cache_ttl = apply_filters( 'minit-cache-expiration-' . $extension, $cache_ttl );
 
-		$this->set_done( $cache_ver );
+		$result = array(
+			'done' => array_keys( $done ),
+			'url' => $combined_file_url,
+			'file' => $combined_file_path,
+		);
 
-		return $this->minit_enqueue_files( $object, $status );
+		set_transient( 'minit-' . $cache_ver, $result, $cache_ttl );
+
+		return $combined_file_url;
 
 	}
 
 
-	function minit_enqueue_files( &$object, $status ) {
+	protected function mark_done( $handles, $object ) {
 
-		extract( $status );
+		$extension = $this->get_object_extension( $object );
 
-		switch ( $extension ) {
+		// Remove processed items from the queue
+		$this->queue[ $extension ] = array_diff( $this->queue[ $extension ], $handles );
 
-			case 'css':
+		// Mark them as processed by Minit
+		$this->done[ $extension ] = array_merge( $this->done[ $extension ], $handles );
 
-				wp_enqueue_style(
-					'minit-' . $cache_ver,
-					$url,
-					null,
-					null
-				);
+		$object->dequeue( $handles );
 
-				// Add inline styles for all minited styles
-				foreach ( $done as $script ) {
+	}
 
-					$inline_style = $object->get_data( $script, 'after' );
 
-					if ( empty( $inline_style ) )
-						continue;
+	function minit_js( $todo ) {
 
-					if ( is_string( $inline_style ) )
-						$object->add_inline_style( 'minit-' . $cache_ver, $inline_style );
-					elseif ( is_array( $inline_style ) )
-						$object->add_inline_style( 'minit-' . $cache_ver, implode( ' ', $inline_style ) );
+		global $wp_scripts;
 
-				}
+		// Run this only in the footer
+		if ( 0 !== $wp_scripts->group )
+			return $todo;
 
-				break;
+		if ( empty( $this->queue[ 'js' ] ) )
+			return $todo;
 
-			case 'js':
+		$handle = 'minit-js';
+		$url = $this->minit_assets( $wp_scripts );
 
-				wp_enqueue_script(
-					'minit-' . $cache_ver,
-					$url,
-					null,
-					null,
-					apply_filters( 'minit-js-in-footer', true )
-				);
-
-				// Add to the correct
-				$object->set_group(
-					'minit-' . $cache_ver,
-					false,
-					apply_filters( 'minit-js-in-footer', true )
-				);
-
-				$inline_data = array();
-
-				// Add inline scripts for all minited scripts
-				foreach ( $done as $script )
-					$inline_data[] = $object->get_data( $script, 'data' );
-
-				// Filter out empty elements
-				$inline_data = array_filter( $inline_data );
-
-				if ( ! empty( $inline_data ) )
-					$object->add_data( 'minit-' . $cache_ver, 'data', implode( "\n", $inline_data ) );
-
-				break;
-
-			default:
-
-				return $todo;
-
+		if ( empty( $url ) ) {
+			return false;
 		}
 
-		// Remove scripts that were merged
-		$todo = array_diff( $todo, $done );
+		// Remove Minited items from the queue
+		$todo = array_diff( $todo, $this->done[ 'js' ] );
 
-		$todo[] = 'minit-' . $cache_ver;
+		// @todo create a fallback for apply_filters( 'minit-js-in-footer', true )
+		wp_register_script( $handle, $url, null, null, true );
 
-		// Mark these items as done
-		$object->done = array_merge( $object->done, $done );
+		// Add our minit script to the queue because wp_register_script is too late already
+		$todo[] = $handle;
 
-		// Remove Minit items from the queue
-		$object->queue = array_diff( $object->queue, $done );
+		$inline_data = array();
+
+		// Add inline scripts for all minited scripts
+		foreach ( $this->done[ 'js' ] as $script )
+			$inline_data[] = $wp_scripts->get_data( $script, 'data' );
+
+		// Filter out empty elements
+		$inline_data = array_filter( $inline_data );
+
+		if ( ! empty( $inline_data ) )
+			$wp_scripts->add_data( $handle, 'data', implode( "\n", $inline_data ) );
 
 		return $todo;
 
 	}
 
 
-	function set_done( $handle ) {
+	function minit_css( $todo ) {
 
-		$this->minit_done[] = 'minit-' . $handle;
+		global $wp_styles;
 
-	}
+		$handle = 'minit-css';
+		$url = $this->minit_assets( $wp_styles );
 
+		if ( empty( $url ) ) {
+			return $todo;
+		}
 
-	function get_done() {
+		// Remove Minited items from the queue
+		$todo = array_diff( $todo, $this->queue[ 'css' ] );
 
-		return $this->minit_done;
+		wp_register_style( $handle, $url, null, null );
+
+		// Add our minit script to the queue because wp_register_style is too late already
+		$todo[] = $handle;
+
+		// Add inline styles for all minited styles
+		foreach ( $this->queue[ 'css' ] as $script ) {
+
+			$inline_style = $wp_styles->get_data( $script, 'after' );
+
+			if ( empty( $inline_style ) )
+				continue;
+
+			if ( is_string( $inline_style ) )
+				$object->add_inline_style( $handle, $inline_style );
+			elseif ( is_array( $inline_style ) )
+				$object->add_inline_style( $handle, implode( ' ', $inline_style ) );
+
+		}
+
+		return $todo;
 
 	}
 
@@ -287,15 +325,11 @@ class Minit {
 
 	}
 
-
-	public function async_init() {
+	public function print_async_scripts() {
 
 		global $wp_scripts;
 
-		if ( ! is_object( $wp_scripts ) || empty( $wp_scripts->queue ) )
-			return;
-
-		$base_url = site_url();
+		$async_queue = array();
 		$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
 
 		foreach ( $wp_scripts->queue as $handle ) {
@@ -305,30 +339,23 @@ class Minit {
 				continue;
 			}
 
-			$script_relative_path = Minit::get_asset_relative_path(
-				$base_url,
-				$wp_scripts->registered[$handle]->src
+			$script_relative_path = $this->get_asset_relative_path(
+				$wp_scripts->base_url,
+				$wp_scripts->registered[ $handle ]->src
 			);
 
 			if ( ! $script_relative_path ) {
 				// Add this script to our async queue
-				$this->async_queue[] = $handle;
-
-				// Remove this script from being printed the regular way
-				wp_dequeue_script( $handle );
+				$async_queue[] = $handle;
 			}
 
 		}
 
-	}
-
-
-	public function async_print() {
-
-		global $wp_scripts;
-
-		if ( empty( $this->async_queue ) )
+		if ( empty( $async_queue ) )
 			return;
+
+		// Remove this script from being printed the regular way
+		wp_dequeue_script( $async_queue );
 
 		?>
 		<!-- Asynchronous scripts by Minit -->
@@ -344,9 +371,9 @@ class Minit {
 					fjs.parentNode.insertBefore(js, fjs);
 				};
 			<?php
-			foreach ( $this->async_queue as $handle ) {
+			foreach ( $async_queue as $handle ) {
 				printf(
-					'add("%s", "%s"); ',
+					'add( "%s", "%s" ); ',
 					$wp_scripts->registered[$handle]->src,
 					'async-script-' . esc_attr( $handle )
 				);
@@ -376,5 +403,29 @@ class Minit {
 
 	}
 
+
+	public static function cache_bump() {
+
+		// Use this as a global cache version number
+		update_option( 'minit_cache_ver', time() );
+
+		// Allow other plugins to know that we purged
+		do_action( 'minit-cache-purged' );
+
+	}
+
+
+	public static function cache_delete() {
+
+  	$wp_upload_dir = wp_upload_dir();
+  	$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+
+  	if ( $minit_files ) {
+  		foreach ( $minit_files as $minit_file ) {
+  			unlink( $minit_file );
+  		}
+  	}
+
+  }
 
 }

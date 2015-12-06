@@ -31,7 +31,7 @@ function minit_add_toc( $content, $items ) {
 	foreach ( $items as $handle => $item_content )
 		$toc[] = sprintf( ' - %s', $handle );
 
-	return sprintf( "/* TOC:\n%s\n*/", implode( "\n", $toc ) ) . $content;
+	return sprintf( "/* Contents:\n%s\n*/", implode( "\n", $toc ) ) . $content;
 
 }
 
