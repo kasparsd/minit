@@ -261,7 +261,7 @@ class Minit {
 		global $wp_scripts;
 
 		// Run this only in the footer
-		if ( 0 !== $wp_scripts->group )
+		if ( ! did_action( 'wp_print_footer_scripts' ) )
 			return $todo;
 
 		$handle = 'minit-js';
