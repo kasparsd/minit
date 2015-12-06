@@ -124,7 +124,7 @@ add_filter( 'minit-exclude-js', 'minit_exclude_defaults' );
 function minit_exclude_defaults( $handles ) {
 
 	$exclude = array(
-		'grofiles-cards', // Jetpack Gravatar module 
+		'this-is-a-handle-of-a-script-you-want-to-exclude',
 	);
 
 	return array_merge( $handles, $exclude );
