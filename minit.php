@@ -9,7 +9,7 @@ Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
 
-add_action( 'plugins_loaded', array( Minit_Plugin, 'instance' ) );
+add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 
 class Minit_Plugin {
 
