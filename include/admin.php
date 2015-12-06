@@ -9,12 +9,10 @@ class Minit_Admin {
 
     $this->plugin = $plugin;
 
-    $this->hook();
-
   }
 
 
-  public function hook() {
+  public function init() {
 
     // Add a Purge Cache link to the plugin list
     // @todo Enable this for multisite somehow

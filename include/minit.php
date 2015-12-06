@@ -2,8 +2,8 @@
 
 class Minit {
 
-	protected static $instance;
-	protected $plugin;
+	private static $instance;
+	private $plugin;
 
 	protected $queue = array(
 		'css' => array(),
@@ -23,7 +23,7 @@ class Minit {
 	}
 
 
-	public function hook() {
+	public function init() {
 
 		// Queue all assets
 		add_filter( 'print_scripts_array', array( $this, 'register_js' ) );
@@ -288,17 +288,12 @@ class Minit {
 		$todo[] = $handle;
 
 		// Add inline styles for all minited styles
-		foreach ( $this->queue[ 'css' ] as $script ) {
+		foreach ( $this->done[ 'css' ] as $script ) {
 
-			$inline_style = $wp_styles->get_data( $script, 'after' );
+			$extras = $wp_styles->get_data( $script, 'after' );
 
-			if ( empty( $inline_style ) )
-				continue;
-
-			if ( is_string( $inline_style ) )
-				$object->add_inline_style( $handle, $inline_style );
-			elseif ( is_array( $inline_style ) )
-				$object->add_inline_style( $handle, implode( ' ', $inline_style ) );
+			if ( ! empty( $extras ) )
+				$wp_styles->add_data( $handle, 'after', $extras );
 
 		}
 
