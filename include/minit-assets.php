@@ -23,6 +23,13 @@ abstract class Minit_Assets {
 	abstract function init();
 
 
+	/**
+	 * Register queued assets for Minit processing.
+	 *
+	 * @param  array $todo List of handles queued for the current request
+	 * 
+	 * @return array       List of handles queued (unchanged)
+	 */
 	function register( $todo ) {
 
 		if ( empty( $todo ) )
@@ -51,6 +58,11 @@ abstract class Minit_Assets {
 	}
 
 
+	/**
+	 * The brains of Minit. Loops through all queued scripts and combines them into a single blob.
+	 *
+	 * @return string|boolean URL of the Minited file or `false` when queue empty or error.
+	 */
 	function minit() {
 
 		$done = array();
@@ -153,6 +165,15 @@ abstract class Minit_Assets {
 	abstract function process( $todo );
 
 
+	/**
+	 * Process the contents of each file.
+	 *
+	 * @param  string $source Asset source
+	 * @param  string $handle Asset handle
+	 * @param  string $src    Relative URL of the asset
+	 *
+	 * @return string         Asset source
+	 */
 	function minit_item( $source, $handle, $src ) {
 
 		return $source;
@@ -160,6 +181,14 @@ abstract class Minit_Assets {
 	}
 
 
+	/**
+	 * Mark these handles as processed by Minit. Note that `done` doesn't mean
+	 * that the resulting script has been printed to the page.
+	 *
+	 * @param array $handles List of asset handles
+	 *
+	 * @return void
+	 */
 	protected function mark_done( $handles ) {
 
 		// Remove processed items from the queue
@@ -171,6 +200,13 @@ abstract class Minit_Assets {
 	}
 
 
+	/**
+	 * Return asset URL relative to the `base_url`.
+	 *
+	 * @param string $handle Asset handle
+	 *
+	 * @return string|boolean Asset URL relative to the base URL or `false` if not found
+	 */
 	protected function get_asset_relative_path( $handle ) {
 
 		if ( ! isset( $this->handler->registered[ $handle ] ) )
