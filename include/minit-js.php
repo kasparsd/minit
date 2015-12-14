@@ -9,9 +9,7 @@ class Minit_Js extends Minit_Assets {
 
 		$this->plugin = $plugin;
 
-		global $wp_scripts;
-
-		parent::__construct( $wp_scripts, 'js' );
+		parent::__construct( wp_scripts(), 'js' );
 
 	}
 

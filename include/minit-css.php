@@ -9,9 +9,7 @@ class Minit_Css extends Minit_Assets {
 
 		$this->plugin = $plugin;
 
-		global $wp_styles;
-
-		parent::__construct( $wp_styles, 'css' );
+		parent::__construct( wp_styles(), 'css' );
 
 	}
 
