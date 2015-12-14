@@ -60,6 +60,7 @@ abstract class Minit_Assets {
 
 		// Build a cache key
 		$ver = array(
+			'revision-' . $this->plugin->revision,
 			'is_ssl-' . is_ssl(), // Use different cache key for SSL and non-SSL
 			'minit_cache_ver-' . get_option( 'minit_cache_ver' ), // Use a global cache version key to purge cache
 		);
