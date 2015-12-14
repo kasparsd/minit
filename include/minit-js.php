@@ -14,7 +14,7 @@ class Minit_Js extends Minit_Assets {
 	}
 
 
-	function init() {
+	public function init() {
 
 		// Queue all assets
 		add_filter( 'print_scripts_array', array( $this, 'register' ) );
