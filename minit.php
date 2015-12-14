@@ -13,86 +13,86 @@ add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 
 class Minit_Plugin {
 
-  public $revision = '20151214';
-  public $plugin_file;
+	public $revision = '20151214';
+	public $plugin_file;
 
 
-  public static function instance() {
+	public static function instance() {
 
-    static $instance;
+		static $instance;
 
-    if ( ! $instance )
-      $instance = new self();
+		if ( ! $instance )
+			$instance = new self();
 
-    return $instance;
+		return $instance;
 
-  }
-
-
-  protected function __construct() {
-
-    $this->plugin_file = __FILE__;
-
-    add_action( 'wp', array( $this, 'init' ) );
-    add_action( 'init', array( $this, 'admin_init' ) );
-
-    // This action can used to delete all Minit cache files from cron
-    add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
-
-  }
+	}
 
 
-  public function init() {
+	protected function __construct() {
 
-    if ( is_admin() )
-      return;
+		$this->plugin_file = __FILE__;
 
-    include dirname( __FILE__ ) . '/include/minit-assets.php';
-    include dirname( __FILE__ ) . '/include/minit-js.php';
-    include dirname( __FILE__ ) . '/include/minit-css.php';
-    include dirname( __FILE__ ) . '/include/helpers.php';
+		add_action( 'wp', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'admin_init' ) );
 
-    $js = new Minit_Js( $this );
-    $css = new Minit_Css( $this );
+		// This action can used to delete all Minit cache files from cron
+		add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
 
-    $js->init();
-    $css->init();
-
-  }
-
-  public function admin_init() {
-
-    include dirname( __FILE__ ) . '/include/admin.php';
-
-    $admin = new Minit_Admin( $this );
-    $admin->init();
-
-  }
+	}
 
 
-  public static function cache_bump() {
+	public function init() {
 
-    // Use this as a global cache version number
-    update_option( 'minit_cache_ver', time() );
+		if ( is_admin() )
+			return;
 
-    // Allow other plugins to know that we purged
-    do_action( 'minit-cache-purged' );
+		include dirname( __FILE__ ) . '/include/minit-assets.php';
+		include dirname( __FILE__ ) . '/include/minit-js.php';
+		include dirname( __FILE__ ) . '/include/minit-css.php';
+		include dirname( __FILE__ ) . '/include/helpers.php';
 
-  }
+		$js = new Minit_Js( $this );
+		$css = new Minit_Css( $this );
+
+		$js->init();
+		$css->init();
+
+	}
+
+	public function admin_init() {
+
+		include dirname( __FILE__ ) . '/include/admin.php';
+
+		$admin = new Minit_Admin( $this );
+		$admin->init();
+
+	}
 
 
-  public static function cache_delete() {
+	public static function cache_bump() {
 
-    $wp_upload_dir = wp_upload_dir();
-    $minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+		// Use this as a global cache version number
+		update_option( 'minit_cache_ver', time() );
 
-    if ( $minit_files ) {
-      foreach ( $minit_files as $minit_file ) {
-        unlink( $minit_file );
-      }
-    }
+		// Allow other plugins to know that we purged
+		do_action( 'minit-cache-purged' );
 
-  }
+	}
+
+
+	public static function cache_delete() {
+
+		$wp_upload_dir = wp_upload_dir();
+		$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+
+		if ( $minit_files ) {
+			foreach ( $minit_files as $minit_file ) {
+				unlink( $minit_file );
+			}
+		}
+
+	}
 
 
 }
