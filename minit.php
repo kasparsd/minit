@@ -14,8 +14,6 @@ add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 class Minit_Plugin {
 
   public $version = 'minit-1.3';
-  public $minit;
-  public $admin;
   public $plugin_file;
 
 
@@ -33,29 +31,34 @@ class Minit_Plugin {
 
   protected function __construct() {
 
-    include dirname( __FILE__ ) . '/include/minit.php';
-    include dirname( __FILE__ ) . '/include/helpers.php';
-    include dirname( __FILE__ ) . '/include/admin.php';
-
     $this->plugin_file = __FILE__;
 
-    $this->minit = new Minit( $this );
-    $this->admin = new Minit_Admin( $this );
-
-    $this->init();
+    add_action( 'init', array( $this, 'init' ) );
 
   }
 
 
   public function init() {
 
-    if ( ! is_admin() )
-      $this->minit->init();
+    include dirname( __FILE__ ) . '/include/minit-assets.php';
+    include dirname( __FILE__ ) . '/include/minit-js.php';
+    include dirname( __FILE__ ) . '/include/minit-css.php';
+    include dirname( __FILE__ ) . '/include/helpers.php';
+    include dirname( __FILE__ ) . '/include/admin.php';
 
-    $this->admin->init();
+    $minit_js = new Minit_Js( $this );
+    $minit_css = new Minit_Css( $this );
+    $minit_admin = new Minit_Admin( $this );
+
+    if ( is_admin() ) {
+      $minit_admin->init();
+    } else {
+      $minit_js->init();
+      $minit_css->init();
+    }
 
     // This action can used to delete all Minit cache files from cron
-		add_action( 'minit-cache-purge-delete', array( $this->minit, 'cache_delete' ) );
+		add_action( 'minit-cache-purge-delete', array( $minit_js, 'cache_delete' ) );
 
   }
 
