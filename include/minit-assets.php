@@ -12,10 +12,10 @@ abstract class Minit_Assets {
 
 		$this->handler = $handler;
 
-		if ( ! empty( $extension ) )
-			$this->extension = $extension;
-		else
-			$this->extension = get_class( $handler );
+		if ( empty( $extension ) )
+			$extension = get_class( $handler );
+
+		$this->extension = $extension;
 
 	}
 
