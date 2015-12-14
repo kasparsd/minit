@@ -200,29 +200,4 @@ abstract class Minit_Assets {
 	}
 
 
-	public static function cache_bump() {
-
-		// Use this as a global cache version number
-		update_option( 'minit_cache_ver', time() );
-
-		// Allow other plugins to know that we purged
-		do_action( 'minit-cache-purged' );
-
-	}
-
-
-	public static function cache_delete() {
-
-  	$wp_upload_dir = wp_upload_dir();
-  	$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
-
-  	if ( $minit_files ) {
-  		foreach ( $minit_files as $minit_file ) {
-  			unlink( $minit_file );
-  		}
-  	}
-
-  }
-
-
 }

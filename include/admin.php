@@ -45,7 +45,7 @@ class Minit_Admin {
     if ( ! check_admin_referer( 'purge_minit' ) )
 		  return;
 
-    $this->plugin->minit->cache_bump();
+    $this->plugin->cache_bump();
 
     add_action( 'admin_notices', array( $this, 'cache_bump_notice' ) );
 
