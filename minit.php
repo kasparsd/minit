@@ -33,7 +33,7 @@ class Minit_Plugin {
 
 		$this->plugin_file = __FILE__;
 
-		add_action( 'wp', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
 
 		// This action can used to delete all Minit cache files from cron
