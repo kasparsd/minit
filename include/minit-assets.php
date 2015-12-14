@@ -71,7 +71,7 @@ abstract class Minit_Assets {
 		$cache_ver = md5( 'minit-' . implode( '-', $ver ) );
 
 		// Try to get queue from cache
-		//$cache = get_transient( 'minit-' . $cache_ver );
+		$cache = get_transient( 'minit-' . $cache_ver );
 
 		if ( ! empty( $cache ) && isset( $cache['url'] ) ) {
 			$this->mark_done( $cache['done'] );
