@@ -2,7 +2,7 @@
 
 class Minit_Js extends Minit_Assets {
 
-	protected $plugin;
+	private $plugin;
 
 
 	function __construct( $plugin ) {
