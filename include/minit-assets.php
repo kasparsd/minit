@@ -6,9 +6,10 @@ abstract class Minit_Assets {
 	public $done = array();
 	public $handler;
 	public $extension;
+	public $revision;
 
 
-	function __construct( $handler, $extension = null ) {
+	function __construct( $handler, $extension = null, $revision = null ) {
 
 		$this->handler = $handler;
 
@@ -16,6 +17,7 @@ abstract class Minit_Assets {
 			$extension = get_class( $handler );
 
 		$this->extension = $extension;
+		$this->revision = $revision;
 
 	}
 
@@ -27,7 +29,7 @@ abstract class Minit_Assets {
 	 * Register queued assets for Minit processing.
 	 *
 	 * @param  array $todo List of handles queued for the current request
-	 * 
+	 *
 	 * @return array       List of handles queued (unchanged)
 	 */
 	function register( $todo ) {
@@ -72,7 +74,7 @@ abstract class Minit_Assets {
 
 		// Build a cache key
 		$ver = array(
-			'revision-' . $this->plugin->revision,
+			'revision-' . $this->revision,
 			'is_ssl-' . is_ssl(), // Use different cache key for SSL and non-SSL
 			'minit_cache_ver-' . get_option( 'minit_cache_ver' ), // Use a global cache version key to purge cache
 		);
