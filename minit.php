@@ -15,9 +15,6 @@ class Minit_Plugin {
 
   public $version = 'minit-1.3';
   public $plugin_file;
-  public $js;
-  public $css;
-  public $admin;
 
 
   public static function instance() {
@@ -36,32 +33,39 @@ class Minit_Plugin {
 
     $this->plugin_file = __FILE__;
 
-    include dirname( __FILE__ ) . '/include/minit-assets.php';
-    include dirname( __FILE__ ) . '/include/minit-js.php';
-    include dirname( __FILE__ ) . '/include/minit-css.php';
-    include dirname( __FILE__ ) . '/include/helpers.php';
-    include dirname( __FILE__ ) . '/include/admin.php';
+    add_action( 'init', array( $this, 'init' ) );
+    add_action( 'admin_init', array( $this, 'admin_init' ) );
 
-    $this->js = new Minit_Js( $this );
-    $this->css = new Minit_Css( $this );
-    $this->admin = new Minit_Admin( $this );
-
-    $this->init();
+    // This action can used to delete all Minit cache files from cron
+    add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
 
   }
 
 
   public function init() {
 
-    if ( is_admin() ) {
-      $this->admin->init();
-    } else {
-      $this->js->init();
-      $this->css->init();
-    }
+    if ( is_admin() )
+      return;
 
-    // This action can used to delete all Minit cache files from cron
-		add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
+    include dirname( __FILE__ ) . '/include/minit-assets.php';
+    include dirname( __FILE__ ) . '/include/minit-js.php';
+    include dirname( __FILE__ ) . '/include/minit-css.php';
+    include dirname( __FILE__ ) . '/include/helpers.php';
+
+    $js = new Minit_Js( $this );
+    $css = new Minit_Css( $this );
+
+    $js->init();
+    $css->init();
+
+  }
+
+  public function admin_init() {
+
+    include dirname( __FILE__ ) . '/include/admin.php';
+
+    $admin = new Minit_Admin( $this );
+    $admin->init();
 
   }
 
