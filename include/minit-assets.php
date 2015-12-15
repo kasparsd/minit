@@ -52,9 +52,6 @@ abstract class Minit_Assets {
 			if ( ! in_array( $handle, $this->queue ) )
 				$this->queue[] = $handle;
 
-		// Mark these as done since we'll take care of them
-		$this->handler->done = array_merge( $this->handler->done, $this->queue );
-
 		return $todo;
 
 	}
@@ -192,6 +189,9 @@ abstract class Minit_Assets {
 	 * @return void
 	 */
 	protected function mark_done( $handles ) {
+
+		// Mark these as done since we'll take care of them
+		$this->handler->done = array_merge( $this->handler->done, $handles );
 
 		// Remove processed items from the queue
 		$this->queue = array_diff( $this->queue, $handles );
