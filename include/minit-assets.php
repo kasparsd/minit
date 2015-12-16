@@ -37,22 +37,10 @@ abstract class Minit_Assets {
 		if ( empty( $todo ) )
 			return $todo;
 
-		// Allow files to be excluded from Minit
-		$minit_exclude = apply_filters( 'minit-exclude-' . $this->extension, array() );
+		// Queue all of them for Minit
+		$this->queue = array_merge( $this->queue, $todo );
 
-		if ( ! is_array( $minit_exclude ) )
-			$minit_exclude = array();
-
-		$minit_todo = array_diff( $todo, $minit_exclude );
-
-		if ( empty( $minit_todo ) )
-			return $todo;
-
-		foreach ( $minit_todo as $handle )
-			if ( ! in_array( $handle, $this->queue ) )
-				$this->queue[] = $handle;
-
-		return $todo;
+		return array();
 
 	}
 
@@ -68,6 +56,10 @@ abstract class Minit_Assets {
 
 		if ( empty( $this->queue ) )
 			return false;
+
+		// Allow others to exclude handles from Minit
+		$exclude = (array) apply_filters( 'minit-exclude-' . $this->extension, array() );
+		$this->queue = array_diff( $this->queue, $exclude );
 
 		// Build a cache key
 		$ver = array(

@@ -37,6 +37,8 @@ class Minit_Js extends Minit_Assets {
 		if ( ! did_action( 'wp_print_footer_scripts' ) )
 			return $todo;
 
+		// Put back handlers that were excluded from Minit
+		$todo = array_merge( $todo, $this->queue );
 		$handle = 'minit-js';
 		$url = $this->minit();
 

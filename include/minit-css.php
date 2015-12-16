@@ -27,6 +27,8 @@ class Minit_Css extends Minit_Assets {
 
 	function process( $todo ) {
 
+		// Put back handlers that were excluded from Minit
+		$todo = array_merge( $todo, $this->queue );
 		$handle = 'minit-css';
 		$url = $this->minit();
 
