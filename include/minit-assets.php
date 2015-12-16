@@ -59,7 +59,6 @@ abstract class Minit_Assets {
 
 		// Allow others to exclude handles from Minit
 		$exclude = (array) apply_filters( 'minit-exclude-' . $this->extension, array() );
-		$this->queue = array_diff( $this->queue, $exclude );
 
 		// Build a cache key
 		$ver = array(
@@ -84,6 +83,9 @@ abstract class Minit_Assets {
 		}
 
 		foreach ( $this->queue as $handle ) {
+
+			if ( in_array( $handle, $exclude ) )
+				continue;
 
 			// Ignore pseudo packages such as jquery which return src as empty string
 			if ( empty( $this->handler->registered[ $handle ]->src ) )
