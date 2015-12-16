@@ -7,6 +7,7 @@ abstract class Minit_Assets {
 	public $handler;
 	public $extension;
 	public $revision;
+	public $using_object_cache;
 
 
 	function __construct( $handler, $extension = null, $revision = null ) {
@@ -18,6 +19,7 @@ abstract class Minit_Assets {
 
 		$this->extension = $extension;
 		$this->revision = $revision;
+		$this->using_object_cache = wp_using_ext_object_cache();
 
 	}
 
@@ -74,7 +76,7 @@ abstract class Minit_Assets {
 		$cache_ver = md5( 'minit-' . implode( '-', $ver ) );
 
 		// Try to get queue from cache
-		$cache = get_transient( 'minit-' . $cache_ver );
+		$cache = $this->get_cache( 'minit-' . $cache_ver );
 
 		if ( ! empty( $cache ) && isset( $cache['url'] ) ) {
 			$this->mark_done( $cache['done'] );
@@ -148,7 +150,7 @@ abstract class Minit_Assets {
 			'file' => $combined_file_path,
 		);
 
-		set_transient( 'minit-' . $cache_ver, $result, $cache_ttl );
+		$this->set_cache( 'minit-' . $cache_ver, $result, $cache_ttl );
 
 		return $combined_file_url;
 
@@ -229,6 +231,28 @@ abstract class Minit_Assets {
 			return $maybe_relative;
 
 		return false;
+
+	}
+
+
+	public function get_cache( $key ) {
+
+		if ( $this->using_object_cache ) {
+			return wp_cache_get( $key, 'minit' );
+		} else {
+			return get_transient( $key );
+		}
+
+	}
+
+
+	public function set_cache( $key, $value, $ttl = 3600 ) {
+
+		if ( $this->using_object_cache ) {
+			return wp_cache_set( $key, $value, 'minit', $ttl );
+		} else {
+			return set_transient( $key, $value, $ttl );
+		}
 
 	}
 
