@@ -223,15 +223,12 @@ abstract class Minit_Assets {
 			return false;
 
 		$full_path = false;
+		//URL in WordPress folder
 		if ( '/' === $item_url[0] ) {
-			// Get the trailing part of the local URL
 			$full_path = ABSPATH . $item_url;
 		}
 		else {
-			$full_path = str_replace( WPMU_PLUGIN_URL, WPMU_PLUGIN_DIR, $item_url );
-			$full_path = str_replace( plugins_url(), WP_PLUGIN_DIR, $full_path );
-			$full_path = str_replace( get_theme_root_uri(), get_theme_root(), $full_path );
-			$full_path = str_replace( content_url(), WP_CONTENT_DIR, $full_path );
+			$full_path = $this->url_to_path( $item_url );
 		}
 
 		if ( $full_path && file_exists( $full_path ) )
@@ -261,6 +258,22 @@ abstract class Minit_Assets {
 			return set_transient( $key, $value, $ttl );
 		}
 
+	}
+
+	/**
+	 * Return the server path of a given URL.
+	 *
+	 * @param string $url The URL of a file
+	 *
+	 * @return string Full server path of the URL
+	 */
+	protected function url_to_path( $url ) {
+		$full_path = str_replace( WPMU_PLUGIN_URL, WPMU_PLUGIN_DIR, $url );
+		$full_path = str_replace( plugins_url(), WP_PLUGIN_DIR, $full_path );
+		$full_path = str_replace( get_theme_root_uri(), get_theme_root(), $full_path );
+		$full_path = str_replace( content_url(), WP_CONTENT_DIR, $full_path );
+
+		return $full_path;
 	}
 
 
