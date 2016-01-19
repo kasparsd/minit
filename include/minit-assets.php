@@ -101,7 +101,13 @@ abstract class Minit_Assets {
 				continue;
 			}
 
-			$item = $this->minit_item( file_get_contents( $src ), $handle, $src );
+			$relative_path = $src;
+
+			if ( substr( $relative_path, 0, strlen( $_SERVER['DOCUMENT_ROOT'] )) == $_SERVER['DOCUMENT_ROOT'] ) {
+				$relative_path = substr( $relative_path, strlen( $_SERVER['DOCUMENT_ROOT'] ) );
+			} 
+
+			$item = $this->minit_item( file_get_contents( $src ), $handle, $relative_path );
 
 			$item = apply_filters(
 				'minit-item-' . $this->extension,
