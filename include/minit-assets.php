@@ -276,5 +276,24 @@ abstract class Minit_Assets {
 		return $full_path;
 	}
 
+	/**
+	 * Filters out the ../ in URLs
+	 *
+	 * @param string $url A possible ugly URL
+	 *
+	 * @return string A nice looking URL
+	 */
+	protected function canonicalize( $url ) {
+		$url = explode( '/', $url );
+		$keys    = array_keys( $url, '..' );
+
+		foreach ( $keys as $keypos => $key ) {
+		    array_splice( $url, $key - ( $keypos * 2 + 1 ), 2 );
+		}
+
+		$url = implode( '/', $url );
+
+		return $url;
+	}
 
 }
