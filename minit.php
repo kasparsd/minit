@@ -47,6 +47,9 @@ class Minit_Plugin {
 		if ( is_admin() )
 			return;
 
+		if ( is_customize_preview() )
+			return;
+
 		include dirname( __FILE__ ) . '/include/minit-assets.php';
 		include dirname( __FILE__ ) . '/include/minit-js.php';
 		include dirname( __FILE__ ) . '/include/minit-css.php';
