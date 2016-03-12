@@ -152,8 +152,10 @@ class Minit {
 		}
 
 		global $minit_imported_stylesheets;
-		if ( !empty( $minit_imported_stylesheets ) )
+		if ( !empty( $minit_imported_stylesheets ) && ('css' == $extension)) {
 			array_unshift($done, implode("\n", $minit_imported_stylesheets));
+			unset($minit_imported_stylesheets);
+		}
 
 		if ( empty( $done ) )
 			return $todo;
