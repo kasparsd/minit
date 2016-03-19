@@ -425,7 +425,9 @@ class Minit {
 					$uri = $base_url . dirname( $src ).'/'.$uri;
 				} elseif (($file_parts = pathinfo($uri)) && (!isset($file_parts['extension']) || 'css' !== $file_parts['extension'])) {
 					global $minit_imported_stylesheets;
-					$minit_imported_stylesheets[] = $matches[0];
+					if (!in_array($matches[0], $minit_imported_stylesheets)) {
+						$minit_imported_stylesheets[] = $matches[0];
+					}
 					return;
 				}
 
