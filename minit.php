@@ -125,9 +125,23 @@ class Minit {
 			if ( ! $src || ! file_exists( ABSPATH . $src ) )
 				continue;
 
+			if (!$content = file_get_contents( ABSPATH . $src )) {
+				continue;
+			}
+
+			if ('css' == $extension) {
+
+				$src = self::get_asset_relative_path(
+					$object->base_url,
+					$object->registered[ $script ]->src
+				);
+
+				$content = self::import_fixer($content, $object->base_url, $src);
+			}
+
 			$script_content = apply_filters(
 					'minit-item-' . $extension,
-					file_get_contents( ABSPATH . $src ),
+					$content,
 					$object,
 					$script
 				);
@@ -135,6 +149,12 @@ class Minit {
 			if ( false !== $script_content )
 				$done[ $script ] = $script_content;
 
+		}
+
+		global $minit_imported_stylesheets;
+		if ( !empty( $minit_imported_stylesheets ) && ('css' == $extension)) {
+			array_unshift($done, implode("\n", $minit_imported_stylesheets));
+			unset($minit_imported_stylesheets);
 		}
 
 		if ( empty( $done ) )
@@ -387,7 +407,47 @@ class Minit {
 
 	}
 
+	static function import_fixer($content, $base_url, $src){
 
+		return preg_replace_callback(
+			"/@import\s?url\(['|\"]?(.+?)['|\"]?\);?/",
+			function($matches) use ($base_url, $src) {
+
+				$uri = $matches[1];
+
+				// In case the URL starts with "//" protocol without schema https(s)
+				if (($pos = strpos($uri, '//')) !== false && $pos == 0) {
+					$uri = (is_ssl() ? 'https:' : 'http:').$uri;
+				}
+
+				// Check if the URI is valid before pre-append the BASE URL
+				if (!filter_var($uri, FILTER_VALIDATE_URL)) {
+					$uri = $base_url . dirname( $src ).'/'.$uri;
+				} elseif (($file_parts = pathinfo($uri)) && (!isset($file_parts['extension']) || 'css' !== $file_parts['extension'])) {
+					global $minit_imported_stylesheets;
+					if (!in_array($matches[0], $minit_imported_stylesheets)) {
+						$minit_imported_stylesheets[] = $matches[0];
+					}
+					return;
+				}
+
+				$toc = str_replace('@', '[at]', $matches[0]);
+
+				if (!$content = wp_remote_fopen( $uri )) {
+					// return "\n/* Could not import $toc*/\n";
+					return;
+				}
+
+				// $output = "\n\n/*TOC: file imported : $toc*/\n";
+				$output = "\n".trim($content)."\n";
+
+				// Repeat the function in case the imported file also contains an @imports
+				return self::import_fixer($output, $base_url, $src);
+			},
+			$content
+		);
+
+	}
 }
 
 
