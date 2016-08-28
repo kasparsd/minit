@@ -95,6 +95,8 @@ class Minit_Plugin {
 			}
 		}
 
+		self::cache_bump();
+
 	}
 
 
