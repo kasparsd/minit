@@ -39,10 +39,7 @@ class Minit_Admin {
 
 	function cache_bump() {
 
-		if ( ! isset( $_GET['purge_minit'] ) )
-			return;
-
-		if ( ! check_admin_referer( 'purge_minit' ) )
+		if ( ! isset( $_GET['purge_minit'] ) || ! check_admin_referer( 'purge_minit' ) )
 			return;
 
 		$this->plugin->cache_bump();

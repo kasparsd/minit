@@ -44,10 +44,7 @@ class Minit_Plugin {
 
 	public function init() {
 
-		if ( is_admin() )
-			return;
-
-		if ( is_customize_preview() )
+		if ( is_admin() || is_customize_preview() )
 			return;
 
 		include dirname( __FILE__ ) . '/include/minit-assets.php';
