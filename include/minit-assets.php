@@ -14,8 +14,9 @@ abstract class Minit_Assets {
 
 		$this->handler = $handler;
 
-		if ( empty( $extension ) )
+		if ( empty( $extension ) ) {
 			$extension = get_class( $handler );
+		}
 
 		$this->extension = $extension;
 		$this->revision = $revision;
@@ -36,8 +37,9 @@ abstract class Minit_Assets {
 	 */
 	function register( $todo ) {
 
-		if ( empty( $todo ) )
+		if ( empty( $todo ) ) {
 			return $todo;
+		}
 
 		// Queue all of them for Minit
 		$this->queue = array_merge( $this->queue, $todo );
@@ -56,8 +58,9 @@ abstract class Minit_Assets {
 
 		$done = array();
 
-		if ( empty( $this->queue ) )
+		if ( empty( $this->queue ) ) {
 			return false;
+		}
 
 		// Allow others to exclude handles from Minit
 		$exclude = (array) apply_filters( 'minit-exclude-' . $this->extension, array() );
@@ -70,8 +73,9 @@ abstract class Minit_Assets {
 		);
 
 		// Include individual scripts versions in the cache key
-		foreach ( $this->queue as $handle )
+		foreach ( $this->queue as $handle ) {
 			$ver[] = sprintf( '%s-%s', $handle, $this->handler->registered[ $handle ]->ver );
+		}
 
 		$cache_ver = md5( 'minit-' . implode( '-', $ver ) );
 
@@ -86,19 +90,22 @@ abstract class Minit_Assets {
 
 		foreach ( $this->queue as $handle ) {
 
-			if ( in_array( $handle, $exclude ) )
+			if ( in_array( $handle, $exclude ) ) {
 				continue;
+			}
 
 			// Ignore pseudo packages such as jquery which return src as empty string
-			if ( empty( $this->handler->registered[ $handle ]->src ) )
+			if ( empty( $this->handler->registered[ $handle ]->src ) ) {
 				$done[ $handle ] = null;
+			}
 
 			// Get the relative URL of the asset
 			$src = $this->get_asset_relative_path( $handle );
 
 			// Skip if the file is not hosted locally
-			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) )
+			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) ) {
 				continue;
+			}
 
 			$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
 
@@ -109,22 +116,25 @@ abstract class Minit_Assets {
 				$handle
 			);
 
-			if ( false !== $item )
+			if ( false !== $item ) {
 				$done[ $handle ] = $item;
-
+			}
 		}
 
-		if ( empty( $done ) )
+		if ( empty( $done ) ) {
 			return false;
+		}
 
 		$this->mark_done( array_keys( $done ) );
 
 		$wp_upload_dir = wp_upload_dir();
 
 		// Try to create the folder for cache
-		if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit' ) )
-			if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) )
+		if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit' ) ) {
+			if ( ! mkdir( $wp_upload_dir['basedir'] . '/minit' ) ) {
 				return false;
+			}
+		}
 
 		$combined_file_path = sprintf( '%s/minit/%s.%s', $wp_upload_dir['basedir'], $cache_ver, $this->extension );
 		$combined_file_url = sprintf( '%s/minit/%s.%s', $wp_upload_dir['baseurl'], $cache_ver, $this->extension );
@@ -136,9 +146,11 @@ abstract class Minit_Assets {
 		$done_imploded = apply_filters( 'minit-content-' . $this->extension, implode( "\n\n", $done ), $done );
 
 		// Store the combined file on the filesystem
-		if ( ! file_exists( $combined_file_path ) )
-			if ( ! file_put_contents( $combined_file_path, $done_imploded ) )
+		if ( ! file_exists( $combined_file_path ) ) {
+			if ( ! file_put_contents( $combined_file_path, $done_imploded ) ) {
 				return false;
+			}
+		}
 
 		// Cache this set of scripts, by default for 24 hours
 		$cache_ttl = apply_filters( 'minit-cache-expiration', 24 * 60 * 60 );
@@ -207,13 +219,15 @@ abstract class Minit_Assets {
 	 */
 	protected function get_asset_relative_path( $handle ) {
 
-		if ( ! isset( $this->handler->registered[ $handle ] ) )
+		if ( ! isset( $this->handler->registered[ $handle ] ) ) {
 			return false;
+		}
 
 		$item_url = $this->handler->registered[ $handle ]->src;
 
-		if ( empty( $item_url ) )
+		if ( empty( $item_url ) ) {
 			return false;
+		}
 
 		// Remove protocol reference from the local base URL
 		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
@@ -221,14 +235,16 @@ abstract class Minit_Assets {
 		// Check if this is a local asset which we can include
 		$src_parts = explode( $base_url, $item_url );
 
-		if ( empty( $src_parts ) )
+		if ( empty( $src_parts ) ) {
 			return false;
+		}
 
 		// Get the trailing part of the local URL
 		$maybe_relative = array_pop( $src_parts );
 
-		if ( file_exists( ABSPATH . $maybe_relative ) )
+		if ( file_exists( ABSPATH . $maybe_relative ) ) {
 			return $maybe_relative;
+		}
 
 		return false;
 
