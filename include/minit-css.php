@@ -47,9 +47,9 @@ class Minit_Css extends Minit_Assets {
 			// Can this return an array instead?
 			$inline_styles = $this->handler->get_data( $script, 'after' );
 
-			if ( ! empty( $inline_styles ) )
+			if ( ! empty( $inline_styles ) ) {
 				$this->handler->add_inline_style( $handle, implode( "\n", $inline_styles ) );
-
+			}
 		}
 
 		return $todo;
@@ -59,8 +59,9 @@ class Minit_Css extends Minit_Assets {
 
 	function minit_item( $content, $handle, $src ) {
 
-		if ( empty( $content ) )
+		if ( empty( $content ) ) {
 			return $content;
+		}
 
 		// Exclude styles with media queries from being included in Minit
 		$content = $this->exclude_with_media_query( $content, $handle, $src );
@@ -78,15 +79,16 @@ class Minit_Css extends Minit_Assets {
 
 	private function resolve_urls( $content, $handle, $src ) {
 
-		if ( ! $content )
+		if ( ! $content ) {
 			return $content;
+		}
 
 		// Make all local asset URLs absolute
 		$content = preg_replace(
-				'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-				sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
-				$content
-			);
+			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
+			sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
+			$content
+		);
 
 		return $content;
 
@@ -95,15 +97,16 @@ class Minit_Css extends Minit_Assets {
 
 	private function resolve_imports( $content, $handle, $src ) {
 
-		if ( ! $content )
+		if ( ! $content ) {
 			return $content;
+		}
 
 		// Make all import asset URLs absolute
 		$content = preg_replace(
-				'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i',
-				sprintf( "@import url('%s/$2')", $this->handler->base_url . dirname( $src ) ),
-				$content
-			);
+			'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i',
+			sprintf( "@import url('%s/$2')", $this->handler->base_url . dirname( $src ) ),
+			$content
+		);
 
 		return $content;
 
@@ -112,14 +115,16 @@ class Minit_Css extends Minit_Assets {
 
 	private function exclude_with_media_query( $content, $handle, $src ) {
 
-		if ( ! $content )
+		if ( ! $content ) {
 			return $content;
+		}
 
 		$whitelist = array( '', 'all', 'screen' );
 
 		// Exclude from Minit if media query specified
-		if ( ! in_array( $this->handler->registered[ $handle ]->args, $whitelist ) )
+		if ( ! in_array( $this->handler->registered[ $handle ]->args, $whitelist ) ) {
 			return false;
+		}
 
 		return $content;
 

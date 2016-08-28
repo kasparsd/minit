@@ -27,10 +27,10 @@ class Minit_Admin {
 	function plugin_action_link_cache_bump( $links ) {
 
 		$links[] = sprintf(
-				'<a href="%s">%s</a>',
-				wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ),
-				__( 'Purge cache', 'minit' )
-			);
+			'<a href="%s">%s</a>',
+			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ),
+			__( 'Purge cache', 'minit' )
+		);
 
 		return $links;
 
@@ -39,8 +39,9 @@ class Minit_Admin {
 
 	function cache_bump() {
 
-		if ( ! isset( $_GET['purge_minit'] ) || ! check_admin_referer( 'purge_minit' ) )
+		if ( ! isset( $_GET['purge_minit'] ) || ! check_admin_referer( 'purge_minit' ) ) {
 			return;
+		}
 
 		$this->plugin->cache_bump();
 

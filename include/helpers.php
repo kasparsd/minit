@@ -6,13 +6,14 @@ add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
 
 function minit_comment_combined( $content, $object, $handle ) {
 
-	if ( ! $content )
+	if ( ! $content ) {
 		return $content;
+	}
 
 	return sprintf(
-			"\n\n/* Minit: %s */\n",
-			$object->registered[ $handle ]->src
-		) . $content;
+		"\n\n/* Minit: %s */\n",
+		$object->registered[ $handle ]->src
+	) . $content;
 
 }
 
@@ -23,13 +24,15 @@ add_filter( 'minit-content-js', 'minit_add_toc', 100, 2 );
 
 function minit_add_toc( $content, $items ) {
 
-	if ( ! $content || empty( $items ) )
+	if ( ! $content || empty( $items ) ) {
 		return $content;
+	}
 
 	$toc = array();
 
-	foreach ( $items as $handle => $item_content )
+	foreach ( $items as $handle => $item_content ) {
 		$toc[] = sprintf( ' - %s', $handle );
+	}
 
 	return sprintf( "/* Contents:\n%s\n*/", implode( "\n", $toc ) ) . $content;
 
@@ -42,8 +45,9 @@ add_filter( 'minit-url-js', 'minit_maybe_ssl_url' );
 
 function minit_maybe_ssl_url( $url ) {
 
-	if ( is_ssl() )
+	if ( is_ssl() ) {
 		return str_replace( 'http://', 'https://', $url );
+	}
 
 	return $url;
 

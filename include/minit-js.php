@@ -34,8 +34,9 @@ class Minit_Js extends Minit_Assets {
 	function process( $todo ) {
 
 		// Run this only in the footer
-		if ( ! did_action( 'wp_print_footer_scripts' ) )
+		if ( ! did_action( 'wp_print_footer_scripts' ) ) {
 			return $todo;
+		}
 
 		// Put back handlers that were excluded from Minit
 		$todo = array_merge( $todo, $this->queue );
@@ -59,13 +60,14 @@ class Minit_Js extends Minit_Assets {
 
 			$extra = $this->handler->get_data( $script, 'data' );
 
-			if ( ! empty( $extra ) )
+			if ( ! empty( $extra ) ) {
 				$inline_js[] = $extra;
-
+			}
 		}
 
-		if ( ! empty( $inline_js ) )
+		if ( ! empty( $inline_js ) ) {
 			$this->handler->add_data( $handle, 'data', implode( "\n", $inline_js ) );
+		}
 
 		return $todo;
 
@@ -90,11 +92,11 @@ class Minit_Js extends Minit_Assets {
 				// Add this script to our async queue
 				$async_queue[] = $handle;
 			}
-
 		}
 
-		if ( empty( $async_queue ) )
+		if ( empty( $async_queue ) ) {
 			return;
+		}
 
 		?>
 		<!-- Asynchronous scripts by Minit -->
@@ -128,16 +130,19 @@ class Minit_Js extends Minit_Assets {
 	public function script_tag_async( $tag, $handle, $src ) {
 
 		// Allow others to disable this feature
-		if ( ! apply_filters( 'minit-script-tag-async', true ) )
+		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
 			return $tag;
+		}
 
 		// Do this for minit scripts only
-		if ( false === stripos( $handle, 'minit-' ) )
+		if ( false === stripos( $handle, 'minit-' ) ) {
 			return $tag;
+		}
 
 		// Bail if async is already set
-		if ( false !== stripos( $tag, ' async' ) )
+		if ( false !== stripos( $tag, ' async' ) ) {
 			return $tag;
+		}
 
 		return str_ireplace( '<script ', '<script async ', $tag );
 

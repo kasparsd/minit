@@ -21,8 +21,9 @@ class Minit_Plugin {
 
 		static $instance;
 
-		if ( ! $instance )
+		if ( ! $instance ) {
 			$instance = new self();
+		}
 
 		return $instance;
 
@@ -44,8 +45,9 @@ class Minit_Plugin {
 
 	public function init() {
 
-		if ( is_admin() || is_customize_preview() )
+		if ( is_admin() || is_customize_preview() ) {
 			return;
+		}
 
 		include dirname( __FILE__ ) . '/include/minit-assets.php';
 		include dirname( __FILE__ ) . '/include/minit-js.php';
