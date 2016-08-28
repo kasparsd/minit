@@ -152,6 +152,8 @@ abstract class Minit_Assets {
 
 		$this->set_cache( 'minit-' . $cache_ver, $result, $cache_ttl );
 
+		do_action( 'minit-result-' . $this->extension, $result );
+
 		return $combined_file_url;
 
 	}
