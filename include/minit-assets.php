@@ -97,10 +97,17 @@ abstract class Minit_Assets {
 			$src = $this->get_asset_relative_path( $handle );
 
 			// Skip if the file is not hosted locally
-			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) )
+			if ( empty( $src ) || ! file_exists( $src ) ) {
 				continue;
+			}
 
-			$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
+			$relative_path = $src;
+
+			if ( substr( $relative_path, 0, strlen( $_SERVER['DOCUMENT_ROOT'] )) == $_SERVER['DOCUMENT_ROOT'] ) {
+				$relative_path = substr( $relative_path, strlen( $_SERVER['DOCUMENT_ROOT'] ) );
+			} 
+
+			$item = $this->minit_item( file_get_contents( $src ), $handle, $relative_path );
 
 			$item = apply_filters(
 				'minit-item-' . $this->extension,
@@ -203,7 +210,7 @@ abstract class Minit_Assets {
 	 *
 	 * @param string $handle Asset handle
 	 *
-	 * @return string|boolean Asset URL relative to the base URL or `false` if not found
+	 * @return string|boolean Asset file path or `false` if not found
 	 */
 	protected function get_asset_relative_path( $handle ) {
 
@@ -215,20 +222,17 @@ abstract class Minit_Assets {
 		if ( empty( $item_url ) )
 			return false;
 
-		// Remove protocol reference from the local base URL
-		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
+		$full_path = false;
+		//URL in WordPress folder
+		if ( '/' === $item_url[0] ) {
+			$full_path = ABSPATH . $item_url;
+		}
+		else {
+			$full_path = $this->url_to_path( $item_url );
+		}
 
-		// Check if this is a local asset which we can include
-		$src_parts = explode( $base_url, $item_url );
-
-		if ( empty( $src_parts ) )
-			return false;
-
-		// Get the trailing part of the local URL
-		$maybe_relative = array_pop( $src_parts );
-
-		if ( file_exists( ABSPATH . $maybe_relative ) )
-			return $maybe_relative;
+		if ( $full_path && file_exists( $full_path ) )
+			return $full_path;
 
 		return false;
 
@@ -256,5 +260,40 @@ abstract class Minit_Assets {
 
 	}
 
+	/**
+	 * Return the server path of a given URL.
+	 *
+	 * @param string $url The URL of a file
+	 *
+	 * @return string Full server path of the URL
+	 */
+	protected function url_to_path( $url ) {
+		$full_path = str_replace( WPMU_PLUGIN_URL, WPMU_PLUGIN_DIR, $url );
+		$full_path = str_replace( plugins_url(), WP_PLUGIN_DIR, $full_path );
+		$full_path = str_replace( get_theme_root_uri(), get_theme_root(), $full_path );
+		$full_path = str_replace( content_url(), WP_CONTENT_DIR, $full_path );
+
+		return $full_path;
+	}
+
+	/**
+	 * Filters out the ../ in URLs
+	 *
+	 * @param string $url A possible ugly URL
+	 *
+	 * @return string A nice looking URL
+	 */
+	protected function canonicalize( $url ) {
+		$url = explode( '/', $url );
+		$keys    = array_keys( $url, '..' );
+
+		foreach ( $keys as $keypos => $key ) {
+		    array_splice( $url, $key - ( $keypos * 2 + 1 ), 2 );
+		}
+
+		$url = implode( '/', $url );
+
+		return $url;
+	}
 
 }

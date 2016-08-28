@@ -82,9 +82,14 @@ class Minit_Css extends Minit_Assets {
 			return $content;
 
 		// Make all local asset URLs absolute
-		$content = preg_replace(
+		$content = preg_replace_callback(
 				'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-				sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
+				function( $matches ) use ($src) {
+					return sprintf(
+						"url('%s')",
+						$this->canonicalize( dirname( $src ) . '/' . $matches[1] )
+					);
+				},
 				$content
 			);
 
@@ -99,9 +104,14 @@ class Minit_Css extends Minit_Assets {
 			return $content;
 
 		// Make all import asset URLs absolute
-		$content = preg_replace(
+		$content = preg_replace_callback(
 				'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i',
-				sprintf( "@import url('%s/$2')", $this->handler->base_url . dirname( $src ) ),
+				function( $matches ) use ($src) {
+					return sprintf(
+						"@import url('%s')",
+						$this->canonicalize( dirname( $src ) . '/' . $matches[1] )
+					);
+				},
 				$content
 			);
 
