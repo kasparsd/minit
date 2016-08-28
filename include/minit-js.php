@@ -113,7 +113,7 @@ class Minit_Js extends Minit_Assets {
 			foreach ( $async_queue as $handle ) {
 				printf(
 					'add( "%s", "%s" ); ',
-					$this->handler->registered[ $handle ]->src,
+					esc_js( $this->handler->registered[ $handle ]->src ),
 					'async-script-' . esc_attr( $handle )
 				);
 			}
