@@ -23,6 +23,10 @@ TODO
 
 ## Changelog
 
+### 1.3.0 (August 28, 2016)
+* Refactor the code for readability.
+* Fix issue with processing files already processed by Minit.
+
 ### 1.2
 * Add Minit JS using async.
 
