@@ -4,7 +4,7 @@ Plugin Name: Minit
 Plugin URI: https://github.com/kasparsd/minit
 GitHub URI: https://github.com/kasparsd/minit
 Description: Combine JS and CSS files and serve them from the uploads folder.
-Version: 1.3-beta.2
+Version: 1.3-beta.3
 Author: Kaspars Dambis
 Author URI: http://kaspars.net
 */
@@ -13,7 +13,7 @@ add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 
 class Minit_Plugin {
 
-	public $revision = '20151214';
+	public $revision = '20160828';
 	public $plugin_file;
 
 
