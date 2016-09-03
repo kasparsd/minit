@@ -86,7 +86,7 @@ class Minit_Plugin {
 	public static function cache_delete() {
 
 		$wp_upload_dir = wp_upload_dir();
-		$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*' );
+		$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*', GLOB_NOSORT );
 
 		if ( $minit_files ) {
 			foreach ( $minit_files as $minit_file ) {
