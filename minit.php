@@ -40,6 +40,9 @@ class Minit_Plugin {
 		// This action can used to delete all Minit cache files from cron
 		add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
 
+		// This action can be used to bump the cache version*
+		add_action( 'minit-cache-version-bump', array( $this, 'cache_bump' ) );
+
 	}
 
 
