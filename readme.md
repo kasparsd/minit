@@ -14,6 +14,8 @@ Combine CSS files and Javascript files into single file in the correct order. Us
 
 The cache is updated when the wp_enqueue version number changes or when the `Minit_Plugin:cache_bump()` method is fired.
 
+The complete cache can be purged by firing the `Minit_Plugin:cache_bump()` method.
+
 
 ## Screenshots
 
