@@ -16,6 +16,7 @@ The cache is updated when the wp_enqueue version number changes or when the `Min
 
 The complete cache can be purged by firing the `Minit_Plugin:cache_bump()` method.
 
+<a href="https://github.com/kasparsd/minit/wiki/Minit-Extensions">Extensions to add additional functionality are available</a>
 
 ## Screenshots
 
