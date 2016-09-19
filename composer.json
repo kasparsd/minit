@@ -1,0 +1,26 @@
+{
+    "name": "kasparsd/minit",
+    "description": "A WordPress plugin to combine CSS and Javascript files",
+    "homepage": "https://github.com/kasparsd/minit",
+    "keywords": [
+        "WordPress", "plugins", "css", "js", "combine", "minify", "concatenate", "optimization", "performance", "speed"
+    ],
+    "support": {
+        "issues": "https://github.com/kasparsd/minit/issues",
+        "source": "https://github.com/kasparsd/minit"
+    },
+    "license": "GPLv2 or later",
+    "authors": [
+        {
+            "name": "Kaspars Dambis",
+            "email": "hi@kaspars.net",
+            "homepage": "http://kaspars.net"
+        }
+    ],
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=5.4.0",
+        "composer/installers": "~1.0"
+    }
+    
+}
