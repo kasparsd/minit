@@ -14,7 +14,7 @@
         {
             "name": "Kaspars Dambis",
             "email": "hi@kaspars.net",
-            "homepage": "http://kaspars.net"
+            "homepage": "https://kaspars.net"
         }
     ],
     "type": "wordpress-plugin",
@@ -22,5 +22,4 @@
         "php": ">=5.4.0",
         "composer/installers": "~1.0"
     }
-    
 }
