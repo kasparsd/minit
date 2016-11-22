@@ -230,7 +230,7 @@ abstract class Minit_Assets {
 			return false;
 		}
 
-		$local_path = get_local_path_from_url( $item_url );
+		$local_path = $this->get_local_path_from_url( $item_url );
 
 		$local_path = apply_filters( 'minit-asset-local-path', $local_path, $item_url, $this->handler->base_url );
 
