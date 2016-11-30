@@ -55,7 +55,8 @@ function minit_maybe_ssl_url( $url ) {
 
 
 // Exclude handles that are known to cause problems
-add_filter( 'minit-exclude-js', 'minit_exclude_defaults' );
+// Modify the array to your liking and uncomment the next line
+//add_filter( 'minit-exclude-js', 'minit_exclude_defaults' );
 
 function minit_exclude_defaults( $handles ) {
 
