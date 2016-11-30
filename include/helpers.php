@@ -1,5 +1,7 @@
 <?php
 
+// Srr the Wiki for other examples https://github.com/kasparsd/minit/wiki
+
 // Prepend the filename of the file being included
 add_filter( 'minit-item-css', 'minit_comment_combined', 15, 3 );
 add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
@@ -50,19 +52,5 @@ function minit_maybe_ssl_url( $url ) {
 	}
 
 	return $url;
-
-}
-
-
-// Exclude handles that are known to cause problems
-add_filter( 'minit-exclude-js', 'minit_exclude_defaults' );
-
-function minit_exclude_defaults( $handles ) {
-
-	$exclude = array(
-		'this-is-a-handle-of-a-script-you-want-to-exclude',
-	);
-
-	return array_merge( $exclude, $handles );
 
 }
