@@ -1,6 +1,6 @@
 <?php
 
-// Srr the Wiki for other examples https://github.com/kasparsd/minit/wiki
+// See the Wiki for other examples https://github.com/kasparsd/minit/wiki
 
 // Prepend the filename of the file being included
 add_filter( 'minit-item-css', 'minit_comment_combined', 15, 3 );
