@@ -88,7 +88,7 @@ class Minit_Js extends Minit_Assets {
 
 			$script_relative_path = $this->get_asset_relative_path( $handle );
 
-			if ( ! $script_relative_path ) {
+			if ( $script_relative_path ) {
 				// Add this script to our async queue
 				$async_queue[] = $handle;
 			}
