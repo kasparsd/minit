@@ -57,27 +57,27 @@ class Minit_Css extends Minit_Assets {
 	}
 
 
-	function minit_item( $content, $handle, $src ) {
+	function minit_item( $content, $handle, $url ) {
 
 		if ( empty( $content ) ) {
 			return $content;
 		}
 
 		// Exclude styles with media queries from being included in Minit
-		$content = $this->exclude_with_media_query( $content, $handle, $src );
+		$content = $this->exclude_with_media_query( $content, $handle );
 
 		// Make all asset URLs absolute
-		$content = $this->resolve_urls( $content, $handle, $src );
+		$content = $this->resolve_urls( $content, $handle, $url );
 
 		// Add support for relative CSS imports
-		$content = $this->resolve_imports( $content, $handle, $src );
+		$content = $this->resolve_imports( $content, $handle, $url );
 
 		return $content;
 
 	}
 
 
-	private function resolve_urls( $content, $handle, $src ) {
+	private function resolve_urls( $content, $handle, $url ) {
 
 		if ( ! $content ) {
 			return $content;
@@ -86,7 +86,7 @@ class Minit_Css extends Minit_Assets {
 		// Make all local asset URLs absolute
 		$content = preg_replace(
 			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-			sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
+			sprintf( "url('%s/$1')", dirname( $url ) ),
 			$content
 		);
 
@@ -95,7 +95,7 @@ class Minit_Css extends Minit_Assets {
 	}
 
 
-	private function resolve_imports( $content, $handle, $src ) {
+	private function resolve_imports( $content, $handle, $url ) {
 
 		if ( ! $content ) {
 			return $content;
@@ -104,7 +104,7 @@ class Minit_Css extends Minit_Assets {
 		// Make all import asset URLs absolute
 		$content = preg_replace(
 			'/@import\s+(url\()?["\'](?!https?:|\/\/)(.*?)["\'](\)?)/i',
-			sprintf( "@import url('%s/$2')", $this->handler->base_url . dirname( $src ) ),
+			sprintf( "@import url('%s/$2')", dirname( $url ) ),
 			$content
 		);
 
@@ -113,7 +113,7 @@ class Minit_Css extends Minit_Assets {
 	}
 
 
-	private function exclude_with_media_query( $content, $handle, $src ) {
+	private function exclude_with_media_query( $content, $handle ) {
 
 		if ( ! $content ) {
 			return $content;

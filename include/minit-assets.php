@@ -100,15 +100,19 @@ abstract class Minit_Assets {
 				continue;
 			}
 
-			// Get the relative URL of the asset
-			$src = $this->get_asset_relative_path( $handle );
+			// Get the absolute local path of the asset
+			$local_path = $this->get_asset_local_path( $handle );
 
 			// Skip if the file is not hosted locally
-			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) ) {
+			if ( empty( $local_path ) || ! file_exists( $local_path ) ) {
 				continue;
 			}
 
-			$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
+			$item = $this->minit_item(
+				file_get_contents( $local_path ),
+				$handle,
+				$this->handler->registered[ $handle ]->src
+			);
 
 			$item = apply_filters(
 				'minit-item-' . $this->extension,
@@ -178,11 +182,11 @@ abstract class Minit_Assets {
 	 *
 	 * @param  string $source Asset source
 	 * @param  string $handle Asset handle
-	 * @param  string $src    Relative URL of the asset
+	 * @param  string $url    Absolute URL of the asset
 	 *
 	 * @return string         Asset source
 	 */
-	function minit_item( $source, $handle, $src ) {
+	function minit_item( $source, $handle, $url ) {
 
 		return $source;
 
@@ -212,13 +216,13 @@ abstract class Minit_Assets {
 
 
 	/**
-	 * Return asset URL relative to the `base_url`.
+	 * Return asset's absolute local path.
 	 *
 	 * @param string $handle Asset handle
 	 *
-	 * @return string|boolean Asset URL relative to the base URL or `false` if not found
+	 * @return string|boolean Asset absolute local path or `false` if not found
 	 */
-	protected function get_asset_relative_path( $handle ) {
+	protected function get_asset_local_path( $handle ) {
 
 		if ( ! isset( $this->handler->registered[ $handle ] ) ) {
 			return false;
@@ -229,6 +233,17 @@ abstract class Minit_Assets {
 		if ( empty( $item_url ) ) {
 			return false;
 		}
+
+		$local_path = $this->get_local_path_from_url( $item_url );
+
+		$local_path = apply_filters( 'minit-asset-local-path', $local_path, $item_url, $this->handler->base_url );
+
+		return $local_path;
+
+	}
+
+
+	protected function get_local_path_from_url( $item_url ) {
 
 		// Remove protocol reference from the local base URL
 		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
@@ -244,7 +259,7 @@ abstract class Minit_Assets {
 		$maybe_relative = array_pop( $src_parts );
 
 		if ( file_exists( ABSPATH . $maybe_relative ) ) {
-			return $maybe_relative;
+			return ABSPATH . $maybe_relative;
 		}
 
 		return false;
