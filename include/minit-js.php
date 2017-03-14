@@ -53,20 +53,34 @@ class Minit_Js extends Minit_Assets {
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = $handle;
 
-		$inline_js = array();
+		$extra = array(
+			'data' => array(),
+			'before' => array(),
+			'after' => array(),
+		);
 
 		// Add inline scripts for all minited scripts
 		foreach ( $this->done as $script ) {
-
-			$extra = $this->handler->get_data( $script, 'data' );
-
-			if ( ! empty( $extra ) ) {
-				$inline_js[] = $extra;
-			}
+			$extra['data'][] = $this->handler->get_data( $script, 'data' );
+			$extra['before'][] = $this->handler->get_data( $script, 'before' );
+			$extra['after'][] = $this->handler->get_data( $script, 'after' );
 		}
 
-		if ( ! empty( $inline_js ) ) {
-			$this->handler->add_data( $handle, 'data', implode( "\n", $inline_js ) );
+		foreach ( $extra as $extra_key => $extra_data ) {
+			// Remove elements that don't have anything
+			$extra_data = array_values( array_filter( $extra_data ) );
+
+			if ( empty( $extra_data ) ) {
+				continue;
+			}
+
+			if ( is_string( $extra_data[0] ) ) {
+				$this->handler->add_data( $handle, $extra_key, implode( "\n", $extra_data ) );
+			} elseif ( is_array( $extra_data[0] ) ) {
+				foreach ( $extra_data as $extra_data_set ) {
+					$this->handler->add_data( $handle, $extra_key, $extra_data_set );
+				}
+			}
 		}
 
 		return $todo;
@@ -129,8 +143,8 @@ class Minit_Js extends Minit_Assets {
 
 	public function script_tag_async( $tag, $handle, $src ) {
 
-		// Allow others to disable this feature
-		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
+		// Allow others to enable this feature
+		if ( ! apply_filters( 'minit-script-tag-async', false ) ) {
 			return $tag;
 		}
 
