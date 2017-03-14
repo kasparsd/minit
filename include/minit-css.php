@@ -126,6 +126,10 @@ class Minit_Css extends Minit_Assets {
 			return false;
 		}
 
+		if ( isset( $this->handler->registered[ $handle ]->extra['conditional'] ) ) {
+			return false;
+		}
+
 		return $content;
 
 	}
