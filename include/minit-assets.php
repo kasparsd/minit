@@ -230,21 +230,23 @@ abstract class Minit_Assets {
 			return false;
 		}
 
-		// Remove protocol reference from the local base URL
-		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
+	    	// plugins
+	   	$path_rel_plugin = explode(plugins_url(), $item_url)[1];
+	    	$path_abs        = WP_PLUGIN_DIR . $path_rel_plugin;
 
-		// Check if this is a local asset which we can include
-		$src_parts = explode( $base_url, $item_url );
+	    	if(empty($path_rel_plugin)) {
+	      		// theme
+	      		$path_rel_theme = explode(get_template_directory_uri(), $item_url)[1];
+	      		$path_abs       = get_template_directory() . $path_rel_theme;
+	    	}
 
-		if ( empty( $src_parts ) ) {
+		if ( empty( $path_rel_plugin ) && empty( $path_rel_theme ) ) {
 			return false;
 		}
 
-		// Get the trailing part of the local URL
-		$maybe_relative = array_pop( $src_parts );
 
-		if ( file_exists( ABSPATH . $maybe_relative ) ) {
-			return $maybe_relative;
+		if ( file_exists( $path_abs ) ) {
+			return $path_abs;
 		}
 
 		return false;
