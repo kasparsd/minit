@@ -230,21 +230,17 @@ abstract class Minit_Assets {
 			return false;
 		}
 
-		// Remove protocol reference from the local base URL
-		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
+   		 $arr = explode(plugins_url(), $item_url);
+   		 $url_rel = $arr[1];
 
-		// Check if this is a local asset which we can include
-		$src_parts = explode( $base_url, $item_url );
-
-		if ( empty( $src_parts ) ) {
+		if ( empty( $url_rel ) ) {
 			return false;
 		}
 
-		// Get the trailing part of the local URL
-		$maybe_relative = array_pop( $src_parts );
+    		$path_abs = WP_PLUGIN_DIR . $url_rel;
 
-		if ( file_exists( ABSPATH . $maybe_relative ) ) {
-			return $maybe_relative;
+		if ( file_exists( $path_abs ) ) {
+			return $path_abs; // TODO: trailing path of the local URL?
 		}
 
 		return false;
