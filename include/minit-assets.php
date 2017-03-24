@@ -230,17 +230,23 @@ abstract class Minit_Assets {
 			return false;
 		}
 
-   		 $arr = explode(plugins_url(), $item_url);
-   		 $url_rel = $arr[1];
+	    	// plugins
+	   	$path_rel_plugin = explode(plugins_url(), $item_url)[1];
+	    	$path_abs        = WP_PLUGIN_DIR . $path_rel_plugin;
 
-		if ( empty( $url_rel ) ) {
+	    	if(empty($path_rel_plugin)) {
+	      		// theme
+	      		$path_rel_theme = explode(get_template_directory_uri(), $item_url)[1];
+	      		$path_abs       = get_template_directory() . $path_rel_theme;
+	    	}
+
+		if ( empty( $path_rel_plugin ) && empty( $path_rel_theme ) ) {
 			return false;
 		}
 
-    		$path_abs = WP_PLUGIN_DIR . $url_rel;
 
 		if ( file_exists( $path_abs ) ) {
-			return $path_abs; // TODO: trailing path of the local URL?
+			return $path_abs;
 		}
 
 		return false;
