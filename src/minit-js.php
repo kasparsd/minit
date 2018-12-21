@@ -176,9 +176,34 @@ class Minit_Js extends Minit_Assets {
 		<?php
 	}
 
+	/**
+	 * Check if the script has any "after" logic defined.
+	 *
+	 * @param  string  $handle Script handle.
+	 *
+	 * @return boolean
+	 */
+	public function script_has_data_after( $handle ) {
+		$data_after = $this->handler->get_data( $script, 'after' );
+
+		return ! empty( $data_after );
+	}
+
+	/**
+	 * Adjust the script tag to support asynchronous loading.
+	 *
+	 * @param  string $tag    Script tag.
+	 * @param  string $handle Script handle or ID.
+	 * @param  string $src    Script tag URL.
+	 *
+	 * @return string
+	 */
 	public function script_tag_async( $tag, $handle, $src ) {
+		// Scripts with "after" logic probably depend on the parent JS.
+		$enable_async = ! $this->script_has_data_after( $handle );
+
 		// Allow others to disable this feature
-		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
+		if ( ! apply_filters( 'minit-script-tag-async', $enable_async ) ) {
 			return $tag;
 		}
 
