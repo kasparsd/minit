@@ -20,15 +20,22 @@ add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 
 class Minit_Plugin {
 
+	/**
+	 * Option key used for storing the cache version value.
+	 *
+	 * @var string
+	 */
+	const CACHE_VERSION_KEY = 'minit_cache_ver';
+
 	public $revision = '20160828';
 	public $plugin_file;
 
 	/**
-	 * Absolute path to the cache directory.
+	 * Instance of the Minit cache.
 	 *
-	 * @var string
+	 * @var Minit_Cache
 	 */
-	protected $cache_dir;
+	public $minit_cache;
 
 	/**
 	 * Get the plugin instance.
@@ -53,13 +60,19 @@ class Minit_Plugin {
 
 		// Define the cache directory.
 		$wp_upload_dir = wp_upload_dir( null, false ); // Don't create the directory.
-		$this->cache_dir = sprintf( '%s/minit', $wp_upload_dir['basedir'] );
+
+		$cache_dir = sprintf(
+			'%s/minit',
+			$wp_upload_dir['basedir']
+		);
+
+		$this->minit_cache = new Minit_Cache( $cache_dir, self::CACHE_VERSION_KEY );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
 
-		// This action can used to delete all Minit cache files from cron
-		add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
+		// This action can used to delete all Minit cache files from cron.
+		add_action( 'minit-cache-purge-delete', array( $this->minit_cache, 'purge' ) );
 	}
 
 
@@ -78,58 +91,6 @@ class Minit_Plugin {
 	public function admin_init() {
 		$admin = new Minit_Admin( $this );
 		$admin->init();
-	}
-
-	/**
-	 * Bump the cache version.
-	 *
-	 * @return void
-	 */
-	protected function cache_bump() {
-		// Use this as a global cache version number
-		update_option( 'minit_cache_ver', time() );
-
-		// Allow other plugins to know that we purged
-		do_action( 'minit-cache-purged' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
-	}
-
-	/**
-	 * Delete cache files and bump the cache version.
-	 *
-	 * @return void
-	 */
-	public function cache_delete() {
-		$minit_files = $this->get_cached_files();
-
-		foreach ( $minit_files as $minit_file ) {
-			unlink( $minit_file );
-		}
-
-		$this->cache_bump();
-	}
-
-	/**
-	 * Get the absolute path to the cache directory.
-	 *
-	 * @return string
-	 */
-	public function cache_dir() {
-		return $this->cache_dir;
-	}
-
-	/**
-	 * Get all files in the cache.
-	 *
-	 * @return array
-	 */
-	public function get_cached_files() {
-		$files = glob( $this->cache_dir() . '/*', GLOB_NOSORT );
-
-		if ( ! empty( $files ) && is_array( $files ) ) {
-			return $files;
-		}
-
-		return array();
 	}
 
 }
