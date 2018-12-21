@@ -12,9 +12,11 @@
 		<exclude name="WordPress.Arrays.MultipleStatementAlignment" />
 	</rule>
 
+	<!--
 	<rule ref="WordPress-Docs">
 		<exclude name="Squiz.Commenting.FileComment" />
 	</rule>
+	-->
 
 	<exclude-pattern>/node_modules</exclude-pattern>
 	<exclude-pattern>/vendor</exclude-pattern>
