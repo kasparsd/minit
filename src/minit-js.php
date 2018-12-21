@@ -39,11 +39,11 @@ class Minit_Js extends Minit_Assets {
 	}
 
 	public function process( $todo ) {
-		// Allow disabling the forced footer placement for scripts.
-		$force_footer = apply_filters( 'minit-js-force-footer', true );
+		// TODO: Allow disabling the forced footer placement for scripts.
+		// $force_footer = apply_filters( 'minit-js-force-footer', true );
 
 		// Run this only in the footer
-		if ( $force_footer && ! did_action( 'wp_print_footer_scripts' ) ) {
+		if ( ! did_action( 'wp_print_footer_scripts' ) ) {
 			return $todo;
 		}
 
