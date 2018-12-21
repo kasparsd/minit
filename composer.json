@@ -18,7 +18,7 @@
     "issues": "https://github.com/kasparsd/minit/issues",
     "source": "https://github.com/kasparsd/minit"
   },
-  "license": "GPLv2 or later",
+  "license": "GPL-2.0-or-later",
   "authors": [{
     "name": "Kaspars Dambis",
     "email": "hi@kaspars.net",
