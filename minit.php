@@ -79,8 +79,12 @@ class Minit_Plugin {
 		$admin->init();
 	}
 
-
-	public function cache_bump() {
+	/**
+	 * Bump the cache version.
+	 *
+	 * @return void
+	 */
+	protected function cache_bump() {
 		// Use this as a global cache version number
 		update_option( 'minit_cache_ver', time() );
 
@@ -88,6 +92,11 @@ class Minit_Plugin {
 		do_action( 'minit-cache-purged' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
+	/**
+	 * Delete cache files and bump the cache version.
+	 *
+	 * @return void
+	 */
 	public function cache_delete() {
 		$minit_files = $this->get_cached_files();
 
