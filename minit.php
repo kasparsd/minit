@@ -13,6 +13,7 @@ Author URI: https://kaspars.net
 include dirname( __FILE__ ) . '/src/minit-assets.php';
 include dirname( __FILE__ ) . '/src/minit-js.php';
 include dirname( __FILE__ ) . '/src/minit-css.php';
+include dirname( __FILE__ ) . '/src/admin.php';
 include dirname( __FILE__ ) . '/src/helpers.php';
 
 add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
@@ -22,9 +23,15 @@ class Minit_Plugin {
 	public $revision = '20160828';
 	public $plugin_file;
 
+	/**
+	 * Absolute path to the cache directory.
+	 *
+	 * @var string
+	 */
+	protected $cache_dir;
+
 
 	public static function instance() {
-
 		static $instance;
 
 		if ( ! $instance ) {
@@ -32,20 +39,24 @@ class Minit_Plugin {
 		}
 
 		return $instance;
-
 	}
 
 
+	/**
+	 * Setup the class.
+	 */
 	protected function __construct() {
-
 		$this->plugin_file = __FILE__;
+
+		// Define the cache directory.
+		$wp_upload_dir = wp_upload_dir( null, false ); // Don't create the directory.
+		$this->cache_dir = sprintf( '%s/minit', $wp_upload_dir['basedir'] );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
 
 		// This action can used to delete all Minit cache files from cron
 		add_action( 'minit-cache-purge-delete', array( $this, 'cache_delete' ) );
-
 	}
 
 
@@ -64,40 +75,51 @@ class Minit_Plugin {
 	}
 
 	public function admin_init() {
-
-		include dirname( __FILE__ ) . '/include/admin.php';
-
 		$admin = new Minit_Admin( $this );
 		$admin->init();
-
 	}
 
 
-	public static function cache_bump() {
-
+	public function cache_bump() {
 		// Use this as a global cache version number
 		update_option( 'minit_cache_ver', time() );
 
 		// Allow other plugins to know that we purged
-		do_action( 'minit-cache-purged' );
-
+		do_action( 'minit-cache-purged' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
+	public function cache_delete() {
+		$minit_files = $this->get_cached_files();
 
-	public static function cache_delete() {
-
-		$wp_upload_dir = wp_upload_dir();
-		$minit_files = glob( $wp_upload_dir['basedir'] . '/minit/*', GLOB_NOSORT );
-
-		if ( $minit_files ) {
-			foreach ( $minit_files as $minit_file ) {
-				unlink( $minit_file );
-			}
+		foreach ( $minit_files as $minit_file ) {
+			unlink( $minit_file );
 		}
 
-		self::cache_bump();
-
+		$this->cache_bump();
 	}
 
+	/**
+	 * Get the absolute path to the cache directory.
+	 *
+	 * @return string
+	 */
+	public function cache_dir() {
+		return $this->cache_dir;
+	}
+
+	/**
+	 * Get all files in the cache.
+	 *
+	 * @return array
+	 */
+	public function get_cached_files() {
+		$files = glob( $this->cache_dir() . '/*', GLOB_NOSORT );
+
+		if ( ! empty( $files ) && is_array( $files ) ) {
+			return $files;
+		}
+
+		return array();
+	}
 
 }
