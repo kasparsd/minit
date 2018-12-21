@@ -101,7 +101,7 @@ abstract class Minit_Assets {
 		);
 
 		foreach ( $this->queue as $handle ) {
-			if ( in_array( $handle, $exclude ) ) {
+			if ( in_array( $handle, $exclude, true ) ) {
 				continue;
 			}
 
