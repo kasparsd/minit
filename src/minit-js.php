@@ -194,7 +194,7 @@ class Minit_Js extends Minit_Assets {
 	 * @return boolean
 	 */
 	public function script_has_data_after( $handle ) {
-		$data_after = $this->handler->get_data( $script, 'after' );
+		$data_after = $this->handler->get_data( $handle, 'after' );
 
 		return ! empty( $data_after );
 	}
