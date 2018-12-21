@@ -28,6 +28,13 @@ class Minit_Plugin {
 	 */
 	const CACHE_VERSION_KEY = 'minit_cache_ver';
 
+	/**
+	 * Cache directory relative to the WP uploads directory.
+	 *
+	 * @var string
+	 */
+	const CACHE_DIR = 'minit';
+
 	public $revision = '20160828';
 	public $plugin_file;
 
@@ -58,7 +65,7 @@ class Minit_Plugin {
 	 */
 	protected function __construct() {
 		$this->plugin_file = __FILE__;
-		$this->minit_cache = new Minit_Asset_Cache( 'minit', self::CACHE_VERSION_KEY );
+		$this->minit_cache = new Minit_Asset_Cache( self::CACHE_DIR, self::CACHE_VERSION_KEY );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
