@@ -25,7 +25,6 @@ class Minit_Js extends Minit_Assets {
 	}
 
 	public function init() {
-
 		// Queue all assets
 		add_filter( 'print_scripts_array', array( $this, 'register' ) );
 
@@ -37,9 +36,7 @@ class Minit_Js extends Minit_Assets {
 
 		// Load our JS files asynchronously
 		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
-
 	}
-
 
 	function process( $todo ) {
 		// Run this only in the footer
@@ -91,12 +88,10 @@ class Minit_Js extends Minit_Assets {
 
 
 	public function print_async_scripts() {
-
 		$async_queue = array();
 		$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
 
 		foreach ( $this->handler->queue as $handle ) {
-
 			// Skip asyncing explicitly excluded script handles
 			if ( in_array( $handle, $minit_exclude ) ) {
 				continue;
@@ -139,12 +134,9 @@ class Minit_Js extends Minit_Assets {
 		})();
 		</script>
 		<?php
-
 	}
 
-
 	public function script_tag_async( $tag, $handle, $src ) {
-
 		// Allow others to disable this feature
 		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
 			return $tag;
@@ -161,8 +153,6 @@ class Minit_Js extends Minit_Assets {
 		}
 
 		return str_ireplace( '<script ', '<script async ', $tag );
-
 	}
-
 
 }
