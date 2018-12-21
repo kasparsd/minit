@@ -2,10 +2,11 @@
 
 class Minit_Css extends Minit_Assets {
 
+	const ASSET_HANDLE = 'minit-css';
+
 	protected $plugin;
 
 	protected $cache;
-
 
 	function __construct( $plugin, $cache ) {
 		$this->plugin = $plugin;
@@ -18,52 +19,54 @@ class Minit_Css extends Minit_Assets {
 		return $this->cache;
 	}
 
-
 	public function init() {
-
 		// Queue all assets
 		add_filter( 'print_styles_array', array( $this, 'register' ) );
 
 		// Print our CSS files
 		add_filter( 'print_styles_array', array( $this, 'process' ), 20 );
-
 	}
 
-
-	function process( $todo ) {
-
+	public function process( $todo ) {
 		// Put back handlers that were excluded from Minit
-		$todo = array_merge( $todo, $this->queue );
-		$handle = 'minit-css';
+		$todo = array_merge(
+			$todo,
+			$this->queue
+		);
+
 		$url = $this->minit();
 
 		if ( empty( $url ) ) {
 			return $todo;
 		}
 
-		wp_enqueue_style( $handle, $url, null, null );
+		wp_enqueue_style(
+			self::ASSET_HANDLE,
+			$url,
+			[],
+			null // We use filenames for versioning.
+		);
 
 		// Add our Minit style since wp_enqueue_script won't do it at this point
-		$todo[] = $handle;
+		$todo[] = self::ASSET_HANDLE;
 
 		// Add inline styles for all minited styles
 		foreach ( $this->done as $script ) {
-
 			// Can this return an array instead?
 			$inline_styles = $this->handler->get_data( $script, 'after' );
 
 			if ( ! empty( $inline_styles ) ) {
-				$this->handler->add_inline_style( $handle, implode( "\n", $inline_styles ) );
+				$this->handler->add_inline_style(
+					self::ASSET_HANDLE,
+					implode( "\n", $inline_styles )
+				);
 			}
 		}
 
 		return $todo;
-
 	}
 
-
-	function minit_item( $content, $handle, $src ) {
-
+	public function minit_item( $content, $handle, $src ) {
 		if ( empty( $content ) ) {
 			return $content;
 		}
@@ -78,12 +81,9 @@ class Minit_Css extends Minit_Assets {
 		$content = $this->resolve_imports( $content, $handle, $src );
 
 		return $content;
-
 	}
 
-
-	private function resolve_urls( $content, $handle, $src ) {
-
+	protected function resolve_urls( $content, $handle, $src ) {
 		if ( ! $content ) {
 			return $content;
 		}
@@ -96,12 +96,9 @@ class Minit_Css extends Minit_Assets {
 		);
 
 		return $content;
-
 	}
 
-
-	private function resolve_imports( $content, $handle, $src ) {
-
+	protected function resolve_imports( $content, $handle, $src ) {
 		if ( ! $content ) {
 			return $content;
 		}
@@ -114,12 +111,9 @@ class Minit_Css extends Minit_Assets {
 		);
 
 		return $content;
-
 	}
 
-
-	private function exclude_with_media_query( $content, $handle, $src ) {
-
+	protected function exclude_with_media_query( $content, $handle, $src ) {
 		if ( ! $content ) {
 			return $content;
 		}
@@ -132,7 +126,6 @@ class Minit_Css extends Minit_Assets {
 		}
 
 		return $content;
-
 	}
 
 }
