@@ -38,7 +38,7 @@ class Minit_Js extends Minit_Assets {
 		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
 	}
 
-	function process( $todo ) {
+	public function process( $todo ) {
 		// Run this only in the footer
 		if ( ! did_action( 'wp_print_footer_scripts' ) ) {
 			return $todo;
@@ -64,26 +64,56 @@ class Minit_Js extends Minit_Assets {
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = self::ASSET_HANDLE;
 
-		$inline_js = array();
+		// Merge all the custom before, after anda data extras with our minit file.
+		$extra = $this->get_script_data(
+			$this->done,
+			array(
+				'data',
+				'before',
+				'after'
+			)
+		);
 
-		// Add inline scripts for all minited scripts
-		foreach ( $this->done as $script ) {
-			$extra = $this->handler->get_data( $script, 'data' );
-
-			if ( ! empty( $extra ) ) {
-				$inline_js[] = $extra;
-			}
+		if ( ! empty( $extra['data'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'data', implode( "\n", $extra['data'] ) );
 		}
 
-		if ( ! empty( $inline_js ) ) {
-			$this->handler->add_data(
-				self::ASSET_HANDLE,
-				'data',
-				implode( "\n", $inline_js )
-			);
+		if ( ! empty( $extra['before'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'before', $extra['before'] );
+		}
+
+		if ( ! empty( $extra['after'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'after', $extra['after'] );
 		}
 
 		return $todo;
+	}
+
+	/**
+	 * Get the custom data associated with each script.
+	 *
+	 * @param  array $handles List of script handles.
+	 * @param  array $keys    List of data keys to get.
+	 *
+	 * @return array
+	 */
+	protected function get_script_data( $handles, $keys ) {
+		$extra = array_combine(
+			$keys,
+			array_fill( 0, count( $keys ), array() ) // Creates a list of empty arrays.
+		);
+
+		foreach ( $handles as $script ) {
+			foreach ( $keys as $key ) {
+				$value = $this->handler->get_data( $script, $key );
+
+				if ( ! empty( $value ) ) {
+					$extra[ $key ][] = $value;
+				}
+			}
+		}
+
+		return $extra;
 	}
 
 
