@@ -2,6 +2,13 @@
 
 class Minit_Js extends Minit_Assets {
 
+	/**
+	 * Asset handle key.
+	 *
+	 * @var string
+	 */
+	const ASSET_HANDLE = 'minit-js';
+
 	protected $plugin;
 
 	protected $cache;
@@ -35,7 +42,6 @@ class Minit_Js extends Minit_Assets {
 
 
 	function process( $todo ) {
-
 		// Run this only in the footer
 		if ( ! did_action( 'wp_print_footer_scripts' ) ) {
 			return $todo;
@@ -43,7 +49,6 @@ class Minit_Js extends Minit_Assets {
 
 		// Put back handlers that were excluded from Minit
 		$todo = array_merge( $todo, $this->queue );
-		$handle = 'minit-js';
 		$url = $this->minit();
 
 		if ( empty( $url ) ) {
@@ -51,16 +56,21 @@ class Minit_Js extends Minit_Assets {
 		}
 
 		// @todo create a fallback for apply_filters( 'minit-js-in-footer', true )
-		wp_register_script( $handle, $url, null, null, true );
+		wp_register_script(
+			self::ASSET_HANDLE,
+			$url,
+			[],
+			null, // We use filenames for versioning.
+			true // Place in the footer.
+		);
 
 		// Add our Minit script since wp_enqueue_script won't do it at this point
-		$todo[] = $handle;
+		$todo[] = self::ASSET_HANDLE;
 
 		$inline_js = array();
 
 		// Add inline scripts for all minited scripts
 		foreach ( $this->done as $script ) {
-
 			$extra = $this->handler->get_data( $script, 'data' );
 
 			if ( ! empty( $extra ) ) {
@@ -69,11 +79,14 @@ class Minit_Js extends Minit_Assets {
 		}
 
 		if ( ! empty( $inline_js ) ) {
-			$this->handler->add_data( $handle, 'data', implode( "\n", $inline_js ) );
+			$this->handler->add_data(
+				self::ASSET_HANDLE,
+				'data',
+				implode( "\n", $inline_js )
+			);
 		}
 
 		return $todo;
-
 	}
 
 
