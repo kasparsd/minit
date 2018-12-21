@@ -43,7 +43,7 @@ class Minit_Plugin {
 	 *
 	 * @var Minit_Cache
 	 */
-	public $minit_cache;
+	protected $minit_cache;
 
 	/**
 	 * Get the plugin instance.
@@ -71,9 +71,35 @@ class Minit_Plugin {
 		add_action( 'init', array( $this, 'admin_init' ) );
 
 		// This action can used to delete all Minit cache files from cron.
-		add_action( 'minit-cache-purge-delete', array( $this->minit_cache, 'purge' ) );
+		add_action( 'minit-cache-purge-delete', array( $this, 'cache_purge' ) );
 	}
 
+	/**
+	 * Return the plugin basename.
+	 *
+	 * @return string
+	 */
+	public function basename() {
+		return plugin_basename( $this->plugin_file );
+	}
+
+	/**
+	 * Bump the cache version to bust the cache.
+	 *
+	 * @return boolean
+	 */
+	public function cache_bump() {
+		return $this->minit_cache->bump();
+	}
+
+	/**
+	 * Delete all the cache files.
+	 *
+	 * @return boolean
+	 */
+	public function cache_purge() {
+		return $this->minit_cache->purge();
+	}
 
 	public function init() {
 		if ( is_admin() || is_customize_preview() ) {
