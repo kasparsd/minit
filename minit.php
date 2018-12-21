@@ -30,7 +30,11 @@ class Minit_Plugin {
 	 */
 	protected $cache_dir;
 
-
+	/**
+	 * Get the plugin instance.
+	 *
+	 * @return Minit_Plugin
+	 */
 	public static function instance() {
 		static $instance;
 
@@ -40,7 +44,6 @@ class Minit_Plugin {
 
 		return $instance;
 	}
-
 
 	/**
 	 * Setup the class.
@@ -61,7 +64,6 @@ class Minit_Plugin {
 
 
 	public function init() {
-
 		if ( is_admin() || is_customize_preview() ) {
 			return;
 		}
@@ -71,7 +73,6 @@ class Minit_Plugin {
 
 		$js->init();
 		$css->init();
-
 	}
 
 	public function admin_init() {
