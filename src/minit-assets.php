@@ -124,7 +124,7 @@ abstract class Minit_Assets {
 
 		$this->mark_done( array_keys( $done ) );
 
-		$wp_upload_dir = wp_upload_dir();
+		$wp_upload_dir = wp_upload_dir( null, false );
 
 		// Try to create the folder for cache
 		if ( ! is_dir( $wp_upload_dir['basedir'] . '/minit' ) ) {
