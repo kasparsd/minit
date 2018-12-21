@@ -23,10 +23,13 @@ class Minit_Asset_Cache {
 	 */
 	protected $url;
 
-	public function __construct( $upload_dir, $version_key ) {
-		$this->dir = $upload_dir['basedir'];
-		$this->url = $upload_dir['baseurl'];
+	public function __construct( $directory, $version_key ) {
 		$this->version_key = $version_key;
+
+		$upload_dir = wp_upload_dir( null, false ); // Don't create the directory.
+
+		$this->dir = sprintf( '%s/%s', $upload_dir['basedir'], $directory );
+		$this->url = sprintf( '%s/%s', $upload_dir['baseurl'], $directory );
 
 		// Ensure the directory exists.
 		if ( ! file_exists( $this->dir ) ) {

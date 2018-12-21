@@ -58,16 +58,7 @@ class Minit_Plugin {
 	 */
 	protected function __construct() {
 		$this->plugin_file = __FILE__;
-
-		// Define the cache directory.
-		$wp_upload_dir = wp_upload_dir( null, false ); // Don't create the directory.
-
-		$cache_dir = sprintf(
-			'%s/minit',
-			$wp_upload_dir['basedir']
-		);
-
-		$this->minit_cache = new Minit_Asset_Cache( $cache_dir, self::CACHE_VERSION_KEY );
+		$this->minit_cache = new Minit_Asset_Cache( 'minit', self::CACHE_VERSION_KEY );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
