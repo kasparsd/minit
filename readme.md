@@ -5,7 +5,7 @@
 
 Install [using Composer](https://packagist.org/packages/kasparsd/minit):
 
-    composer require --dev kasparsd/minit
+    composer require kasparsd/minit
 
 or by manually downloading the [latest release file](https://github.com/kasparsd/minit/releases/latest).
 
