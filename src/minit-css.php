@@ -130,6 +130,11 @@ class Minit_Css extends Minit_Assets {
 			return false;
 		}
 
+		// Exclude all items with conditionals.
+		if ( isset( $this->handler->registered[ $handle ]->extra['conditional'] ) ) {
+			return false;
+		}
+
 		return $content;
 	}
 
