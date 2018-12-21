@@ -119,6 +119,10 @@ class Minit_Js extends Minit_Assets {
 			}
 		}
 
+		foreach ( $extra as &$values ) {
+			$values = array_filter( $values );
+		}
+
 		return $extra;
 	}
 
