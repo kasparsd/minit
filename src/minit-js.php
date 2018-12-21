@@ -89,11 +89,15 @@ class Minit_Js extends Minit_Assets {
 
 	public function print_async_scripts() {
 		$async_queue = array();
-		$minit_exclude = (array) apply_filters( 'minit-exclude-js', array() );
+
+		$minit_exclude = (array) apply_filters(
+			'minit-exclude-js',
+			array()
+		);
 
 		foreach ( $this->handler->queue as $handle ) {
 			// Skip asyncing explicitly excluded script handles
-			if ( in_array( $handle, $minit_exclude ) ) {
+			if ( in_array( $handle, $minit_exclude, true ) ) {
 				continue;
 			}
 
