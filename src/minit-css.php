@@ -2,15 +2,20 @@
 
 class Minit_Css extends Minit_Assets {
 
-	private $plugin;
+	protected $plugin;
+
+	protected $cache;
 
 
-	function __construct( $plugin ) {
-
+	function __construct( $plugin, $cache ) {
 		$this->plugin = $plugin;
+		$this->cache = $cache;
 
 		parent::__construct( wp_styles(), 'css', $plugin->revision );
+	}
 
+	public function file_cache() {
+		return $this->cache;
 	}
 
 

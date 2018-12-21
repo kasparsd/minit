@@ -11,6 +11,7 @@ Author URI: https://kaspars.net
 
 // Until we add proper autoloading.
 include dirname( __FILE__ ) . '/src/minit-assets.php';
+include dirname( __FILE__ ) . '/src/minit-asset-cache.php';
 include dirname( __FILE__ ) . '/src/minit-js.php';
 include dirname( __FILE__ ) . '/src/minit-css.php';
 include dirname( __FILE__ ) . '/src/admin.php';
@@ -66,7 +67,7 @@ class Minit_Plugin {
 			$wp_upload_dir['basedir']
 		);
 
-		$this->minit_cache = new Minit_Cache( $cache_dir, self::CACHE_VERSION_KEY );
+		$this->minit_cache = new Minit_Asset_Cache( $cache_dir, self::CACHE_VERSION_KEY );
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
@@ -81,8 +82,8 @@ class Minit_Plugin {
 			return;
 		}
 
-		$js = new Minit_Js( $this );
-		$css = new Minit_Css( $this );
+		$js = new Minit_Js( $this, $this->minit_cache );
+		$css = new Minit_Css( $this, $this->minit_cache );
 
 		$js->init();
 		$css->init();
