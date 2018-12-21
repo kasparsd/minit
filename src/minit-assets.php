@@ -193,11 +193,8 @@ abstract class Minit_Assets {
 	 * @return string         Asset source
 	 */
 	function minit_item( $source, $handle, $src ) {
-
 		return $source;
-
 	}
-
 
 	/**
 	 * Mark these handles as processed by Minit. Note that `done` doesn't mean
@@ -208,18 +205,24 @@ abstract class Minit_Assets {
 	 * @return void
 	 */
 	protected function mark_done( $handles ) {
-
 		// Mark these as done since we'll take care of them
-		$this->handler->done = array_merge( $this->handler->done, $handles );
+		$this->handler->done = array_merge(
+			$this->handler->done,
+			$handles
+		);
 
 		// Remove processed items from the queue
-		$this->queue = array_diff( $this->queue, $handles );
+		$this->queue = array_diff(
+			$this->queue,
+			$handles
+		);
 
 		// Mark them as processed by Minit
-		$this->done = array_merge( $this->done, $handles );
-
+		$this->done = array_merge(
+			$this->done,
+			$handles
+		);
 	}
-
 
 	/**
 	 * Return asset URL relative to the `base_url`.
@@ -229,7 +232,6 @@ abstract class Minit_Assets {
 	 * @return string|boolean Asset URL relative to the base URL or `false` if not found
 	 */
 	protected function get_asset_relative_path( $handle ) {
-
 		if ( ! isset( $this->handler->registered[ $handle ] ) ) {
 			return false;
 		}
@@ -258,17 +260,39 @@ abstract class Minit_Assets {
 		}
 
 		return false;
-
 	}
 
+	/**
+	 * Cache for references to minited resources.
+	 *
+	 * @param  string $key Cache Key.
+	 *
+	 * @return mixed
+	 */
 	public function get_cache( $key ) {
 		return get_transient( $this->prefix_cache_key( $key ) );
 	}
 
+	/**
+	 * Cache references to minited resources.
+	 *
+	 * @param string  $key   Cache key.
+	 * @param mixed   $value Value to cache.
+	 * @param integer $ttl   Time to live or cache expiration.
+	 *
+	 * @return boolean
+	 */
 	public function set_cache( $key, $value, $ttl = 3600 ) {
 		return set_transient( $this->prefix_cache_key( $key ), $value, $ttl );
 	}
 
+	/**
+	 * Prefix all cache keys with a generic key.
+	 *
+	 * @param  string $key Cache key.
+	 *
+	 * @return string
+	 */
 	protected function prefix_cache_key( $key ) {
 		return sprintf( 'minit-%s', $key );
 	}
