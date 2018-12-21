@@ -102,6 +102,7 @@ class Minit_Plugin {
 	}
 
 	public function init() {
+		// Don't do anything in the admin view.
 		if ( is_admin() || is_customize_preview() ) {
 			return;
 		}
