@@ -9,6 +9,12 @@ Author: Kaspars Dambis
 Author URI: https://kaspars.net
 */
 
+// Until we add proper autoloading.
+include dirname( __FILE__ ) . '/src/minit-assets.php';
+include dirname( __FILE__ ) . '/src/minit-js.php';
+include dirname( __FILE__ ) . '/src/minit-css.php';
+include dirname( __FILE__ ) . '/src/helpers.php';
+
 add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
 
 class Minit_Plugin {
@@ -48,11 +54,6 @@ class Minit_Plugin {
 		if ( is_admin() || is_customize_preview() ) {
 			return;
 		}
-
-		include dirname( __FILE__ ) . '/src/minit-assets.php';
-		include dirname( __FILE__ ) . '/src/minit-js.php';
-		include dirname( __FILE__ ) . '/src/minit-css.php';
-		include dirname( __FILE__ ) . '/src/helpers.php';
 
 		$js = new Minit_Js( $this );
 		$css = new Minit_Css( $this );
