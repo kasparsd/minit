@@ -110,7 +110,10 @@ class Minit_Js extends Minit_Assets {
 			foreach ( $keys as $key ) {
 				$value = $this->handler->get_data( $script, $key );
 
-				if ( ! empty( $value ) ) {
+				// WordPress has this strange way of adding "after" and "before".
+				if ( is_array( $value ) ) {
+					$extra[ $key ] = array_merge( $extra[ $key ], $value );
+				} else {
 					$extra[ $key ][] = $value;
 				}
 			}
