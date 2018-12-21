@@ -109,28 +109,34 @@ class Minit_Js extends Minit_Assets {
 			return;
 		}
 
+		$scripts = array();
+
+		foreach ( $async_queue as $handle ) {
+			$scripts[] = array(
+				'id' => 'async-script-' . sanitize_key( $handle ),
+				'src' => $this->handler->registered[ $handle ]->src,
+			);
+		}
+
 		?>
 		<!-- Asynchronous scripts by Minit -->
 		<script id="minit-async-scripts" type="text/javascript">
 		(function() {
-			var js, fjs = document.getElementById('minit-async-scripts'),
-				add = function( url, id ) {
-					js = document.createElement('script');
-					js.type = 'text/javascript';
-					js.src = url;
-					js.async = true;
-					js.id = id;
-					fjs.parentNode.insertBefore(js, fjs);
-				};
-			<?php
-			foreach ( $async_queue as $handle ) {
-				printf(
-					'add( "%s", "%s" ); ',
-					esc_js( $this->handler->registered[ $handle ]->src ),
-					'async-script-' . esc_attr( $handle )
-				);
-			}
-			?>
+			var scripts = <?php echo wp_json_encode( $scripts ); ?>;
+			var fjs = document.getElementById( 'minit-async-scripts' );
+
+			function minitLoadScript( url, id ) {
+				var js = document.createElement('script');
+				js.type = 'text/javascript';
+				js.src = url;
+				js.async = true;
+				js.id = id;
+				fjs.parentNode.insertBefore(js, fjs);
+			};
+
+			scripts.map( function( script ) {
+				minitLoadScript( script.url, script.id );
+			} );
 		})();
 		</script>
 		<?php
