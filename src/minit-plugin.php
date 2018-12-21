@@ -56,8 +56,9 @@ class Minit_Plugin {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'admin_init' ) );
 
-		// This action can used to delete all Minit cache files from cron.
+		// This action can used to bump and purge Minit cache from cron.
 		add_action( 'minit-cache-purge-delete', array( $this, 'cache_purge' ) );
+		add_action( 'minit-cache-version-bump', array( $this, 'cache_bump' ) );
 	}
 
 	/**
