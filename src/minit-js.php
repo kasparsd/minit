@@ -70,7 +70,7 @@ class Minit_Js extends Minit_Assets {
 			array(
 				'data',
 				'before',
-				'after'
+				'after',
 			)
 		);
 
