@@ -45,7 +45,12 @@ class Minit_Plugin {
 	 * Setup the class.
 	 */
 	protected function __construct() {
-		$this->plugin_file = __FILE__;
+		// TODO: Pass this in when we move away from a singleton.
+		$this->plugin_file = sprintf(
+			'%s/minit.php',
+			dirname( dirname( __FILE__ ) )
+		);
+
 		$this->minit_cache = new Minit_Asset_Cache( self::CACHE_DIR, self::CACHE_VERSION_KEY );
 
 		add_action( 'init', array( $this, 'init' ) );
