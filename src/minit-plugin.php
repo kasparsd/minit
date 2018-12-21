@@ -22,7 +22,7 @@ class Minit_Plugin {
 	/**
 	 * Instance of the Minit cache.
 	 *
-	 * @var Minit_Cache
+	 * @var Minit_Asset_Cache
 	 */
 	protected $minit_cache;
 
