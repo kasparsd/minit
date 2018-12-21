@@ -7,11 +7,9 @@ abstract class Minit_Assets {
 	public $handler;
 	public $extension;
 	public $revision;
-	public $using_object_cache;
 
 
 	function __construct( $handler, $extension = null, $revision = null ) {
-
 		$this->handler = $handler;
 
 		if ( empty( $extension ) ) {
@@ -20,8 +18,6 @@ abstract class Minit_Assets {
 
 		$this->extension = $extension;
 		$this->revision = $revision;
-		$this->using_object_cache = wp_using_ext_object_cache();
-
 	}
 
 
@@ -251,27 +247,12 @@ abstract class Minit_Assets {
 
 	}
 
-
 	public function get_cache( $key ) {
-
-		if ( $this->using_object_cache ) {
-			return wp_cache_get( $key, 'minit' );
-		} else {
-			return get_transient( $key );
-		}
-
+		return get_transient( $key );
 	}
-
 
 	public function set_cache( $key, $value, $ttl = 3600 ) {
-
-		if ( $this->using_object_cache ) {
-			return wp_cache_set( $key, $value, 'minit', $ttl );
-		} else {
-			return set_transient( $key, $value, $ttl );
-		}
-
+		return set_transient( $key, $value, $ttl );
 	}
-
 
 }
