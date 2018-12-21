@@ -95,23 +95,27 @@ abstract class Minit_Assets {
 		}
 
 		// Allow others to exclude handles from Minit.
-		$exclude = (array) apply_filters( 'minit-exclude-' . $this->extension, array() );
+		$exclude = (array) apply_filters(
+			'minit-exclude-' . $this->extension,
+			array()
+		);
 
 		foreach ( $this->queue as $handle ) {
 			if ( in_array( $handle, $exclude ) ) {
 				continue;
 			}
 
-			// Ignore pseudo packages such as jquery which return src as empty string
+			// Ignore pseudo packages such as jquery which return src as empty string.
 			if ( empty( $this->handler->registered[ $handle ]->src ) ) {
 				$done[ $handle ] = null;
+
 				continue;
 			}
 
-			// Get the relative URL of the asset
+			// Get the relative URL of the asset.
 			$src = $this->get_asset_relative_path( $handle );
 
-			// Skip if the file is not hosted locally
+			// Skip if the file is not hosted locally.
 			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) ) {
 				continue;
 			}
