@@ -123,10 +123,16 @@ class Minit_Css extends Minit_Assets {
 			return $content;
 		}
 
-		$whitelist = array( '', 'all', 'screen' );
+		// Ignore these media queries.
+		$allowlist = array( null, '', 'all', 'screen' );
 
-		// Exclude from Minit if media query specified
-		if ( ! in_array( $this->handler->registered[ $handle ]->args, $whitelist ) ) {
+		// Exclude from Minit if media query specified.
+		if ( ! in_array( $this->handler->registered[ $handle ]->args, $allowlist, true ) ) {
+			return false;
+		}
+
+		// Exclude all items with conditionals.
+		if ( ! empty( $this->handler->registered[ $handle ]->extra['conditional'] ) ) {
 			return false;
 		}
 

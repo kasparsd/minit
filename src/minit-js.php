@@ -38,7 +38,10 @@ class Minit_Js extends Minit_Assets {
 		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
 	}
 
-	function process( $todo ) {
+	public function process( $todo ) {
+		// TODO: Allow disabling the forced footer placement for scripts.
+		// $force_footer = apply_filters( 'minit-js-force-footer', true );
+
 		// Run this only in the footer
 		if ( ! did_action( 'wp_print_footer_scripts' ) ) {
 			return $todo;
@@ -64,26 +67,63 @@ class Minit_Js extends Minit_Assets {
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = self::ASSET_HANDLE;
 
-		$inline_js = array();
+		// Merge all the custom before, after anda data extras with our minit file.
+		$extra = $this->get_script_data(
+			$this->done,
+			array(
+				'data',
+				'before',
+				'after',
+			)
+		);
 
-		// Add inline scripts for all minited scripts
-		foreach ( $this->done as $script ) {
-			$extra = $this->handler->get_data( $script, 'data' );
-
-			if ( ! empty( $extra ) ) {
-				$inline_js[] = $extra;
-			}
+		if ( ! empty( $extra['data'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'data', implode( "\n", $extra['data'] ) );
 		}
 
-		if ( ! empty( $inline_js ) ) {
-			$this->handler->add_data(
-				self::ASSET_HANDLE,
-				'data',
-				implode( "\n", $inline_js )
-			);
+		if ( ! empty( $extra['before'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'before', $extra['before'] );
+		}
+
+		if ( ! empty( $extra['after'] ) ) {
+			$this->handler->add_data( self::ASSET_HANDLE, 'after', $extra['after'] );
 		}
 
 		return $todo;
+	}
+
+	/**
+	 * Get the custom data associated with each script.
+	 *
+	 * @param  array $handles List of script handles.
+	 * @param  array $keys    List of data keys to get.
+	 *
+	 * @return array
+	 */
+	protected function get_script_data( $handles, $keys ) {
+		$extra = array_combine(
+			$keys,
+			array_fill( 0, count( $keys ), array() ) // Creates a list of empty arrays.
+		);
+
+		foreach ( $handles as $script ) {
+			foreach ( $keys as $key ) {
+				$value = $this->handler->get_data( $script, $key );
+
+				// WordPress has this strange way of adding "after" and "before".
+				if ( is_array( $value ) ) {
+					$extra[ $key ] = array_merge( $extra[ $key ], $value );
+				} else {
+					$extra[ $key ][] = $value;
+				}
+			}
+		}
+
+		foreach ( $extra as &$values ) {
+			$values = array_filter( $values );
+		}
+
+		return $extra;
 	}
 
 
@@ -146,9 +186,34 @@ class Minit_Js extends Minit_Assets {
 		<?php
 	}
 
+	/**
+	 * Check if the script has any "after" logic defined.
+	 *
+	 * @param  string  $handle Script handle.
+	 *
+	 * @return boolean
+	 */
+	public function script_has_data_after( $handle ) {
+		$data_after = $this->handler->get_data( $handle, 'after' );
+
+		return ! empty( $data_after );
+	}
+
+	/**
+	 * Adjust the script tag to support asynchronous loading.
+	 *
+	 * @param  string $tag    Script tag.
+	 * @param  string $handle Script handle or ID.
+	 * @param  string $src    Script tag URL.
+	 *
+	 * @return string
+	 */
 	public function script_tag_async( $tag, $handle, $src ) {
+		// Scripts with "after" logic probably depend on the parent JS.
+		$enable_async = ! $this->script_has_data_after( $handle );
+
 		// Allow others to disable this feature
-		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
+		if ( ! apply_filters( 'minit-script-tag-async', $enable_async ) ) {
 			return $tag;
 		}
 
