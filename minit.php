@@ -49,10 +49,10 @@ class Minit_Plugin {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/include/minit-assets.php';
-		include dirname( __FILE__ ) . '/include/minit-js.php';
-		include dirname( __FILE__ ) . '/include/minit-css.php';
-		include dirname( __FILE__ ) . '/include/helpers.php';
+		include dirname( __FILE__ ) . '/src/minit-assets.php';
+		include dirname( __FILE__ ) . '/src/minit-js.php';
+		include dirname( __FILE__ ) . '/src/minit-css.php';
+		include dirname( __FILE__ ) . '/src/helpers.php';
 
 		$js = new Minit_Js( $this );
 		$css = new Minit_Css( $this );
