@@ -139,7 +139,11 @@ abstract class Minit_Assets {
 		$cache_filename = sprintf( '%s.%s', $cache_ver, $this->extension );
 
 		// Allow other plugins to minify and obfuscate.
-		$done_imploded = apply_filters( 'minit-content-' . $this->extension, implode( "\n\n", $done ), $done );
+		$done_imploded = apply_filters(
+			'minit-content-' . $this->extension,
+			implode( "\n\n", $done ),
+			$done
+		);
 
 		// Store the combined file on the filesystem.
 		$this->file_cache()->set( $cache_filename, $done_imploded );
@@ -152,14 +156,22 @@ abstract class Minit_Assets {
 		);
 
 		// Cache this set of scripts, by default for 24 hours.
-		$cache_ttl = apply_filters( 'minit-cache-expiration', 24 * 60 * 60 );
-		$cache_ttl = apply_filters( 'minit-cache-expiration-' . $this->extension, $cache_ttl );
+		$cache_ttl = apply_filters(
+			'minit-cache-expiration',
+			24 * 60 * 60
+		);
+
+		$cache_ttl = apply_filters(
+			'minit-cache-expiration-' . $this->extension,
+			$cache_ttl
+		);
 
 		$this->set_cache(
 			$cache_ver,
 			array(
 				'done' => array_keys( $done ),
 				'url' => $combined_file_url,
+				'file' => $cache_filename,
 			),
 			$cache_ttl
 		);
