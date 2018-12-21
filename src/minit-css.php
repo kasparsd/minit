@@ -2,6 +2,11 @@
 
 class Minit_Css extends Minit_Assets {
 
+	/**
+	 * Asset handle key.
+	 *
+	 * @var string
+	 */
 	const ASSET_HANDLE = 'minit-css';
 
 	protected $plugin;
