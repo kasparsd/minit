@@ -97,6 +97,7 @@ abstract class Minit_Assets {
 			// Ignore pseudo packages such as jquery which return src as empty string
 			if ( empty( $this->handler->registered[ $handle ]->src ) ) {
 				$done[ $handle ] = null;
+				continue;
 			}
 
 			// Get the relative URL of the asset

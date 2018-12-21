@@ -14,12 +14,18 @@ Combine CSS files and Javascript files into single file in the correct order. Us
 
 TODO
 
-
 ## Screenshots
 
 1. All CSS files combined in a single file
 2. All external Javascript files loading asynchronously
 
+## Minit addons
+
+- [Minit-Pro](https://github.com/markoheijnen/Minit-Pro)
+- [Minit Cron Purge](https://github.com/ryanhellyer/minit-cron-purge)
+- [Minit Cache Bump](https://github.com/ryanhellyer/minit-cache-bump)
+- [Minit CDN](https://github.com/LQ2-apostrophe/minit-cdn)
+- [Minit Manual Inclusion](https://github.com/dimadin/minit-manual-inclusion)
 
 ## Changelog
 
