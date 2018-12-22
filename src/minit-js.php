@@ -179,7 +179,7 @@ class Minit_Js extends Minit_Assets {
 			};
 
 			scripts.map( function( script ) {
-				minitLoadScript( script.url, script.id );
+				minitLoadScript( script.src, script.id );
 			} );
 		})();
 		</script>
