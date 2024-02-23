@@ -49,6 +49,9 @@ abstract class Minit_Assets {
 	/**
 	 * Get a cache key for a set of assets for the current request.
 	 *
+	 * TODO: Account for before and after values being included
+	 * in the bundle in case of CSS.
+	 *
 	 * @param  array  $handles List of asset handle strings.
 	 *
 	 * @return string
@@ -61,7 +64,7 @@ abstract class Minit_Assets {
 			'minit_cache_ver-' . $this->file_cache()->version(), // Use a global cache version key to purge cache.
 		);
 
-		// Include individual scripts versions in the cache key
+		// Include individual scripts versions in the cache key.
 		foreach ( $handles as $handle ) {
 			$ver[] = sprintf( '%s-%s', $handle, $this->handler->registered[ $handle ]->ver );
 		}
