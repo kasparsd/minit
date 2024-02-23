@@ -55,23 +55,17 @@ class Minit_Css extends Minit_Assets {
 		// Add our Minit style since wp_enqueue_script won't do it at this point
 		$todo[] = self::ASSET_HANDLE;
 
-		// Add inline styles for all minited styles
-		foreach ( $this->done as $script ) {
-			// Can this return an array instead?
-			$inline_styles = $this->handler->get_data( $script, 'after' );
-
-			if ( ! empty( $inline_styles ) ) {
-				$this->handler->add_inline_style(
-					self::ASSET_HANDLE,
-					implode( "\n", $inline_styles )
-				);
-			}
-		}
-
 		return $todo;
 	}
 
 	public function minit_item( $content, $handle, $src ) {
+		// Append all inline styles right after to preserve order.
+		$inline_styles = $this->handler->get_data( $handle, 'after' );
+
+		if ( ! empty( $inline_styles ) ) {
+			$content .= implode( "\n", $inline_styles );
+		}
+
 		if ( empty( $content ) ) {
 			return $content;
 		}
