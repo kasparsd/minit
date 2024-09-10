@@ -35,7 +35,7 @@ See the [Wiki](https://github.com/kasparsd/minit/wiki) for additional documentat
 
 Use the `minit-script-tag-async` filter to load the concatenated Javascript synchronously:
 
-	add_filter( 'minit-script-tag-async', '__return_false' );
+    add_filter( 'minit-script-tag-async', '__return_false' );
 
 ### Exclude Files
 
@@ -47,6 +47,20 @@ Use the `minit-exclude-js` and `minit-exclude-css` filters to exclude files from
         return $handles;
     } );
 
+### Minify CSS
+
+Use this filter to apply basic CSS minification to the created bundle:
+
+    add_filter(
+        'minit-content-css',
+        function ( $css ) {
+                $css = preg_replace( '/[\n\r\t]/mi', ' ', $css ); // Line breaks to spaces.
+                $css = preg_replace( '/\s+/mi', ' ', $css ); // Multiple spaces to single spaces.
+
+                return $css;
+        },
+        5 // Do it before the debug comment in the head.
+    );
 
 ## Minit Addons
 
