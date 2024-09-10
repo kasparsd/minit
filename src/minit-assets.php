@@ -108,33 +108,24 @@ abstract class Minit_Assets {
 				continue;
 			}
 
-			// Ignore pseudo packages such as jquery which return src as empty string.
-			if ( empty( $this->handler->registered[ $handle ]->src ) ) {
-				$done[ $handle ] = null;
-
-				continue;
-			}
-
 			// Get the relative URL of the asset.
 			$src = $this->get_asset_relative_path( $handle );
 
-			// Skip if the file is not hosted locally.
-			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) ) {
-				continue;
+			$item_content = '';
+
+			// Ignore pseudo packages such as jquery which return src as empty string.
+			if ( $src && is_readable( ABSPATH . $src ) ) {
+				$item_content = file_get_contents( ABSPATH . $src );
 			}
 
-			$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
+			$item = $this->minit_item( $item_content, $handle, $src );
 
-			$item = apply_filters(
+			$done[ $handle ] = apply_filters(
 				'minit-item-' . $this->extension,
 				$item,
 				$this->handler,
 				$handle
 			);
-
-			if ( false !== $item ) {
-				$done[ $handle ] = $item;
-			}
 		}
 
 		if ( empty( $done ) ) {
