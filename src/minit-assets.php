@@ -111,21 +111,17 @@ abstract class Minit_Assets {
 			// Get the relative URL of the asset.
 			$src = $this->get_asset_relative_path( $handle );
 
-			$item_content = '';
-
 			// Ignore pseudo packages such as jquery which return src as empty string.
-			if ( $src && is_readable( ABSPATH . $src ) ) {
-				$item_content = file_get_contents( ABSPATH . $src );
+			if ( ! empty( $src ) && is_readable( ABSPATH . $src ) ) {
+				$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
+
+				$done[ $handle ] = apply_filters(
+					'minit-item-' . $this->extension,
+					$item,
+					$this->handler,
+					$handle
+				);
 			}
-
-			$item = $this->minit_item( $item_content, $handle, $src );
-
-			$done[ $handle ] = apply_filters(
-				'minit-item-' . $this->extension,
-				$item,
-				$this->handler,
-				$handle
-			);
 		}
 
 		if ( empty( $done ) ) {
