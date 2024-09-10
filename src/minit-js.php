@@ -31,9 +31,6 @@ class Minit_Js extends Minit_Assets {
 		// Print our JS file
 		add_filter( 'print_scripts_array', array( $this, 'process' ), 20 );
 
-		// Print external scripts asynchronously in the footer
-		add_action( 'wp_print_footer_scripts', array( $this, 'print_async_scripts' ), 20 );
-
 		// Load our JS files asynchronously
 		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
 	}
@@ -124,66 +121,6 @@ class Minit_Js extends Minit_Assets {
 		}
 
 		return $extra;
-	}
-
-
-	public function print_async_scripts() {
-		$async_queue = array();
-
-		$minit_exclude = (array) apply_filters(
-			'minit-exclude-js',
-			array()
-		);
-
-		foreach ( $this->handler->queue as $handle ) {
-			// Skip asyncing explicitly excluded script handles
-			if ( in_array( $handle, $minit_exclude, true ) ) {
-				continue;
-			}
-
-			$script_relative_path = $this->get_asset_relative_path( $handle );
-
-			if ( ! $script_relative_path ) {
-				// Add this script to our async queue
-				$async_queue[] = $handle;
-			}
-		}
-
-		if ( empty( $async_queue ) ) {
-			return;
-		}
-
-		$scripts = array();
-
-		foreach ( $async_queue as $handle ) {
-			$scripts[] = array(
-				'id' => 'async-script-' . sanitize_key( $handle ),
-				'src' => $this->handler->registered[ $handle ]->src,
-			);
-		}
-
-		?>
-		<!-- Asynchronous scripts by Minit -->
-		<script id="minit-async-scripts" type="text/javascript">
-		(function() {
-			var scripts = <?php echo wp_json_encode( $scripts ); ?>;
-			var fjs = document.getElementById( 'minit-async-scripts' );
-
-			function minitLoadScript( url, id ) {
-				var js = document.createElement('script');
-				js.type = 'text/javascript';
-				js.src = url;
-				js.async = true;
-				js.id = id;
-				fjs.parentNode.insertBefore(js, fjs);
-			};
-
-			scripts.map( function( script ) {
-				minitLoadScript( script.src, script.id );
-			} );
-		})();
-		</script>
-		<?php
 	}
 
 	/**

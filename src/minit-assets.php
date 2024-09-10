@@ -108,32 +108,19 @@ abstract class Minit_Assets {
 				continue;
 			}
 
-			// Ignore pseudo packages such as jquery which return src as empty string.
-			if ( empty( $this->handler->registered[ $handle ]->src ) ) {
-				$done[ $handle ] = null;
-
-				continue;
-			}
-
 			// Get the relative URL of the asset.
 			$src = $this->get_asset_relative_path( $handle );
 
-			// Skip if the file is not hosted locally.
-			if ( empty( $src ) || ! file_exists( ABSPATH . $src ) ) {
-				continue;
-			}
+			// Ignore pseudo packages such as jquery which return src as empty string.
+			if ( ! empty( $src ) && is_readable( ABSPATH . $src ) ) {
+				$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
 
-			$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
-
-			$item = apply_filters(
-				'minit-item-' . $this->extension,
-				$item,
-				$this->handler,
-				$handle
-			);
-
-			if ( false !== $item ) {
-				$done[ $handle ] = $item;
+				$done[ $handle ] = apply_filters(
+					'minit-item-' . $this->extension,
+					$item,
+					$this->handler,
+					$handle
+				);
 			}
 		}
 
@@ -243,27 +230,30 @@ abstract class Minit_Assets {
 			return false;
 		}
 
-		$item_url = $this->handler->registered[ $handle ]->src;
+		if ( ! empty( $this->handler->registered[ $handle ]->src ) ) {
+			$item_url = $this->handler->registered[ $handle ]->src;
 
-		if ( empty( $item_url ) ) {
-			return false;
-		}
+			// Inline block scripts are sometimes relative URLs.
+			if ( 0 === strpos( $item_url, '/' ) ) {
+				return $item_url;
+			}
 
-		// Remove protocol reference from the local base URL
-		$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
+			// Remove protocol reference from the local base URL
+			$base_url = preg_replace( '/^(https?:)/i', '', $this->handler->base_url );
 
-		// Check if this is a local asset which we can include
-		$src_parts = explode( $base_url, $item_url );
+			// Check if this is a local asset which we can include
+			$src_parts = explode( $base_url, $item_url );
 
-		if ( empty( $src_parts ) ) {
-			return false;
-		}
+			// Get the trailing part of the local URL
+			if ( ! empty( $src_parts ) ) {
+				return array_pop( $src_parts );
+			}
+		} elseif ( ! empty( $this->handler->registered[ $handle ]->extra[ 'path' ] ) ) {
+			$item_path = $this->handler->registered[ $handle ]->extra[ 'path' ];
 
-		// Get the trailing part of the local URL
-		$maybe_relative = array_pop( $src_parts );
-
-		if ( file_exists( ABSPATH . $maybe_relative ) ) {
-			return $maybe_relative;
+			if ( 0 === strpos( $item_path, ABSPATH ) ) {
+				return str_replace( ABSPATH, '', $item_path );
+			}
 		}
 
 		return false;
