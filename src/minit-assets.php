@@ -248,12 +248,6 @@ abstract class Minit_Assets {
 			if ( ! empty( $src_parts ) ) {
 				return array_pop( $src_parts );
 			}
-		} elseif ( ! empty( $this->handler->registered[ $handle ]->extra[ 'path' ] ) ) {
-			$item_path = $this->handler->registered[ $handle ]->extra[ 'path' ];
-
-			if ( 0 === strpos( $item_path, ABSPATH ) ) {
-				return str_replace( ABSPATH, '', $item_path );
-			}
 		}
 
 		return false;
