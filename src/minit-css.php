@@ -48,12 +48,15 @@ class Minit_Css extends Minit_Assets {
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			$url,
-			[],
+			$this->queue,
 			null // We use filenames for versioning.
 		);
 
-		// Add our Minit style since wp_enqueue_script won't do it at this point
-		$todo[] = self::ASSET_HANDLE;
+		/**
+		 * Add our Minit style since wp_enqueue_script won't do it at this point.
+		 * Place it before all other scripts.
+		 */
+		array_unshift( $todo, self::ASSET_HANDLE );
 
 		return $todo;
 	}
