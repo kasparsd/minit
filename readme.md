@@ -18,8 +18,6 @@ or by manually downloading the [latest release file](https://github.com/kasparsd
 
 - Loads the concatenated Javascript file asynchronously in the footer. This will probably break all inline scripts that rely on jQuery being available. See the configuration section below for how to disable this.
 
-- Loads all external Javascript files asynchronously in the footer of the page.
-
 
 ## Screenshots
 
