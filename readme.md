@@ -1,5 +1,7 @@
 # Minit for WordPress
 
+Places all your CSS and Javascript files into dedicated bundles that can be cached by browsers and re-used between requests. It assumes that a single request with slightly larger transfer size is more performant than multiple smaller requests (even with HTTP/2 multiplexing).
+
 ## Install
 
 Install [using Composer](https://packagist.org/packages/kasparsd/minit):
