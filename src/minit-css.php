@@ -48,7 +48,7 @@ class Minit_Css extends Minit_Assets {
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			$url,
-			[],
+			$this->queue,
 			null // We use filenames for versioning.
 		);
 
