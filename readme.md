@@ -45,6 +45,21 @@ Use the `minit-exclude-js` and `minit-exclude-css` filters to exclude files from
         return $handles;
     } );
 
+### Integrate with Block Themes
+
+Full block-based themes enqueue the individual stylesheets [only for the blocks that are required for the current request](https://github.com/WordPress/wordpress-develop/blob/b42f5f95417413ee6b05ef389e21b3a0d61d3370/src/wp-includes/global-styles-and-settings.php#L320-L339). This leads to bundles being unique between requests thus defeating the purpose or cache re-use. Use the [`should_load_separate_core_block_assets` filter](https://developer.wordpress.org/reference/hooks/should_load_separate_core_block_assets/) to enqueue a single `block-library` stylesheet instead on all requests:
+
+    add_action(
+        'plugins_loaded',
+        function () {
+            if ( class_exists( 'Minit_Plugin' ) ) {
+                // Add late to override the default behaviour.
+                add_filter( 'should_load_separate_core_block_assets', '__return_false', 20 );
+            }
+        },
+        100 // Do it after all plugins are loaded.
+    );
+
 ### Minify CSS
 
 Use this filter to apply basic CSS minification to the created bundle:
