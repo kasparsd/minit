@@ -8,6 +8,7 @@ Description: Combine JS and CSS files and serve them from the uploads folder.
 Version: 2.1.0
 Author: Kaspars Dambis
 Author URI: https://kaspars.net
+Require PHP: 7.4
 */
 
 // Until we add proper autoloading.
