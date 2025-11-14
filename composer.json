@@ -29,15 +29,19 @@
     "php": ">=7.4"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "^1.2",
-    "phpunit/phpunit": "^5.7"
+    "wp-coding-standards/wpcs": "^3.2"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   },
   "scripts": {
     "lint": [
-      "vendor/bin/phpcs ."
+      "phpcs ."
     ],
-    "test": [
-      "vendor/bin/phpunit"
+    "format": [
+      "phpcbf ."
     ]
   }
 }
