@@ -57,7 +57,9 @@ class Minit_Js extends Minit_Assets {
 			true // Place in the footer.
 		);
 
-		wp_script_add_data( self::ASSET_HANDLE, 'strategy', 'defer' );
+		if ( apply_filters( 'minit-script-tag-async', true ) ) {
+			wp_script_add_data( self::ASSET_HANDLE, 'strategy', 'defer' );
+		}
 
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = self::ASSET_HANDLE;
