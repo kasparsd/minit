@@ -13,7 +13,7 @@ class Minit_Js extends Minit_Assets {
 
 	protected $cache;
 
-	function __construct( $plugin, $cache ) {
+	public function __construct( $plugin, $cache ) {
 		$this->plugin = $plugin;
 		$this->cache = $cache;
 

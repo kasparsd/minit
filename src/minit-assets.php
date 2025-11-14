@@ -8,7 +8,7 @@ abstract class Minit_Assets {
 	public $extension;
 	public $revision;
 
-	function __construct( $handler, $extension = null, $revision = null ) {
+	public function __construct( $handler, $extension = null, $revision = null ) {
 		$this->handler = $handler;
 
 		if ( empty( $extension ) ) {
@@ -20,10 +20,10 @@ abstract class Minit_Assets {
 	}
 
 
-	abstract function file_cache();
+	abstract public function file_cache();
 
 
-	abstract function init();
+	abstract public function init();
 
 
 	/**
@@ -33,8 +33,7 @@ abstract class Minit_Assets {
 	 *
 	 * @return array       List of handles queued (unchanged)
 	 */
-	function register( $todo ) {
-
+	public function register( $todo ) {
 		if ( empty( $todo ) ) {
 			return $todo;
 		}
@@ -77,7 +76,7 @@ abstract class Minit_Assets {
 	 *
 	 * @return string|boolean URL of the Minited file or `false` when queue empty or error.
 	 */
-	function minit() {
+	public function minit() {
 		$done = array();
 
 		if ( empty( $this->queue ) ) {
@@ -172,9 +171,7 @@ abstract class Minit_Assets {
 		return $combined_file_url;
 	}
 
-
-	abstract function process( $todo );
-
+	abstract public function process( $todo );
 
 	/**
 	 * Process the contents of each file.
@@ -185,7 +182,7 @@ abstract class Minit_Assets {
 	 *
 	 * @return string         Asset source
 	 */
-	function minit_item( $source, $handle, $src ) {
+	public function minit_item( $source, $handle, $src ) {
 		return $source;
 	}
 
