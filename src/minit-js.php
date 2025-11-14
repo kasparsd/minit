@@ -63,7 +63,7 @@ class Minit_Js extends Minit_Assets {
 		// Add our Minit script since wp_enqueue_script won't do it at this point
 		$todo[] = self::ASSET_HANDLE;
 
-		// Merge all the custom before, after anda data extras with our minit file.
+		// Merge all the custom before, after and data extras with our minit file.
 		$extra = $this->get_script_data(
 			$this->done,
 			array(
