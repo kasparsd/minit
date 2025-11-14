@@ -31,8 +31,8 @@ class Minit_Js extends Minit_Assets {
 		// Print our JS file
 		add_filter( 'print_scripts_array', array( $this, 'process' ), 20 );
 
-		// Load our JS files asynchronously
-		add_filter( 'script_loader_tag', array( $this, 'script_tag_async' ), 20, 3 );
+		// Defer all our JS.
+		add_filter( 'script_loader_tag', array( $this, 'script_tag_defer' ), 20, 3 );
 	}
 
 	public function process( $todo ) {
@@ -121,20 +121,7 @@ class Minit_Js extends Minit_Assets {
 	}
 
 	/**
-	 * Check if the script has any "after" logic defined.
-	 *
-	 * @param  string  $handle Script handle.
-	 *
-	 * @return boolean
-	 */
-	public function script_has_data_after( $handle ) {
-		$data_after = $this->handler->get_data( $handle, 'after' );
-
-		return ! empty( $data_after );
-	}
-
-	/**
-	 * Adjust the script tag to support asynchronous loading.
+	 * Fallback to defering for older versions of WP.
 	 *
 	 * @param  string $tag    Script tag.
 	 * @param  string $handle Script handle or ID.
@@ -142,26 +129,21 @@ class Minit_Js extends Minit_Assets {
 	 *
 	 * @return string
 	 */
-	public function script_tag_async( $tag, $handle, $src ) {
-		// Scripts with "after" logic probably depend on the parent JS.
-		$enable_async = ! $this->script_has_data_after( $handle );
-
-		// Allow others to disable this feature
-		if ( ! apply_filters( 'minit-script-tag-async', $enable_async ) ) {
+	public function script_tag_defer( $tag, $handle, $src ) {
+		if ( self::ASSET_HANDLE !== $handle ) {
 			return $tag;
 		}
 
-		// Do this for minit scripts only
-		if ( false === stripos( $handle, 'minit-' ) ) {
+		if ( ! apply_filters( 'minit-script-tag-async', true ) ) {
 			return $tag;
 		}
 
-		// Bail if async is already set
-		if ( false !== stripos( $tag, ' async' ) ) {
+		// Bail if defered already.
+		if ( false !== stripos( $tag, ' defer' ) ) {
 			return $tag;
 		}
 
-		return str_ireplace( '<script ', '<script async ', $tag );
+		return str_ireplace( ' src=', ' defer src=', $tag );
 	}
 
 }
