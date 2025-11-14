@@ -8,6 +8,7 @@
 		<exclude name="WordPress.Files.FileName" /><!-- We'll be switching to PSR-4 naming soon. -->
 		<exclude name="Generic.Formatting.MultipleStatementAlignment" />
 		<exclude name="WordPress.Arrays.MultipleStatementAlignment" />
+		<exclude name="WordPress.NamingConventions.ValidHookName.UseUnderscores" />
 	</rule>
 
 	<!--
