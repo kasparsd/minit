@@ -82,7 +82,17 @@ class Minit_Js extends Minit_Assets {
 		}
 
 		if ( ! empty( $extra['after'] ) ) {
-			$this->handler->add_data( self::ASSET_HANDLE, 'after', $extra['after'] );
+			$this->handler->add_data(
+				self::ASSET_HANDLE,
+				'after',
+				[
+					sprintf(
+						"document.getElementById( '%s' ).addEventListener( 'load', function () { %s } );",
+						self::ASSET_HANDLE . '-js',
+						implode( ' ', $extra['after'] )
+					)
+				]
+			);
 		}
 
 		return $todo;
