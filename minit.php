@@ -11,6 +11,10 @@ Author URI: https://kaspars.net
 Require PHP: 7.4
 */
 
+if ( ! function_exists( 'add_action' ) ) {
+	return;
+}
+
 // Until we add proper autoloading.
 require_once __DIR__ . '/src/minit-assets.php';
 require_once __DIR__ . '/src/minit-asset-cache.php';
@@ -19,9 +23,5 @@ require_once __DIR__ . '/src/minit-css.php';
 require_once __DIR__ . '/src/minit-plugin.php';
 require_once __DIR__ . '/src/admin.php';
 require_once __DIR__ . '/src/helpers.php';
-
-if ( ! function_exists( 'add_action' ) ) {
-	return;
-}
 
 add_action( 'plugins_loaded', array( Minit_Plugin::class, 'instance' ) );
