@@ -19,4 +19,8 @@ include __DIR__ . '/src/minit-plugin.php';
 include __DIR__ . '/src/admin.php';
 include __DIR__ . '/src/helpers.php';
 
-add_action( 'plugins_loaded', array( 'Minit_Plugin', 'instance' ) );
+if ( ! function_exists( 'add_action' ) ) {
+	return;
+}
+
+add_action( 'plugins_loaded', array( Minit_Plugin::class, 'instance' ) );
