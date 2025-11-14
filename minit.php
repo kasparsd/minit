@@ -21,7 +21,7 @@ require_once __DIR__ . '/src/minit-asset-cache.php';
 require_once __DIR__ . '/src/minit-js.php';
 require_once __DIR__ . '/src/minit-css.php';
 require_once __DIR__ . '/src/minit-plugin.php';
-require_once __DIR__ . '/src/admin.php';
 require_once __DIR__ . '/src/helpers.php';
+require_once __DIR__ . '/src/minit-admin.php';
 
 add_action( 'plugins_loaded', array( Minit_Plugin::class, 'instance' ) );
