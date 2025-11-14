@@ -6,17 +6,15 @@
 add_filter( 'minit-item-css', 'minit_comment_combined', 15, 3 );
 add_filter( 'minit-item-js', 'minit_comment_combined', 15, 3 );
 
-function minit_comment_combined( $content, $object, $handle ) {
-
+function minit_comment_combined( $content, $asset, $handle ) {
 	if ( ! $content ) {
 		return $content;
 	}
 
 	return sprintf(
 		"\n\n/* Minit: %s */\n",
-		$object->registered[ $handle ]->src
+		$asset->registered[ $handle ]->src
 	) . $content;
-
 }
 
 
@@ -37,7 +35,6 @@ function minit_add_toc( $content, $items ) {
 	}
 
 	return sprintf( "/* Contents:\n%s\n*/", implode( "\n", $toc ) ) . $content;
-
 }
 
 
@@ -52,5 +49,4 @@ function minit_maybe_ssl_url( $url ) {
 	}
 
 	return $url;
-
 }

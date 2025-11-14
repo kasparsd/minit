@@ -52,7 +52,7 @@ class Minit_Js extends Minit_Assets {
 		wp_register_script(
 			self::ASSET_HANDLE,
 			$url,
-			[],
+			array(),
 			null, // We use filenames for versioning.
 			true // Place in the footer.
 		);
@@ -84,13 +84,13 @@ class Minit_Js extends Minit_Assets {
 			$this->handler->add_data(
 				self::ASSET_HANDLE,
 				'after',
-				[
+				array(
 					sprintf(
 						"document.getElementById( '%s' ).addEventListener( 'load', function () { %s } );",
 						self::ASSET_HANDLE . '-js',
 						implode( ' ', $extra['after'] )
-					)
-				]
+					),
+				)
 			);
 		}
 
@@ -156,5 +156,4 @@ class Minit_Js extends Minit_Assets {
 
 		return str_ireplace( ' src=', ' defer src=', $tag );
 	}
-
 }

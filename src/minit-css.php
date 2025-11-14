@@ -13,7 +13,7 @@ class Minit_Css extends Minit_Assets {
 
 	protected $cache;
 
-	function __construct( $plugin, $cache ) {
+	public function __construct( $plugin, $cache ) {
 		$this->plugin = $plugin;
 		$this->cache = $cache;
 
@@ -135,5 +135,4 @@ class Minit_Css extends Minit_Assets {
 
 		return $content;
 	}
-
 }

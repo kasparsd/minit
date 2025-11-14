@@ -58,5 +58,4 @@ class Minit_Admin {
 			__( 'Success: Minit cache purged.', 'minit' )
 		);
 	}
-
 }

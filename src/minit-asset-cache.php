@@ -152,5 +152,4 @@ class Minit_Asset_Cache {
 
 		return array();
 	}
-
 }

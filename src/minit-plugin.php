@@ -48,7 +48,7 @@ class Minit_Plugin {
 		// TODO: Pass this in when we move away from a singleton.
 		$this->plugin_file = sprintf(
 			'%s/minit.php',
-			dirname( dirname( __FILE__ ) )
+			dirname( __DIR__ )
 		);
 
 		$this->minit_cache = new Minit_Asset_Cache( self::CACHE_DIR, self::CACHE_VERSION_KEY );
@@ -105,5 +105,4 @@ class Minit_Plugin {
 		$admin = new Minit_Admin( $this );
 		$admin->init();
 	}
-
 }

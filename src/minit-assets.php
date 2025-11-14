@@ -43,7 +43,6 @@ abstract class Minit_Assets {
 		$this->queue = array_merge( $this->queue, $todo );
 
 		return array();
-
 	}
 
 	/**
@@ -287,5 +286,4 @@ abstract class Minit_Assets {
 	protected function prefix_cache_key( $key ) {
 		return sprintf( 'minit-%s', $key );
 	}
-
 }

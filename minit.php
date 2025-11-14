@@ -12,13 +12,13 @@ Require PHP: 7.4
 */
 
 // Until we add proper autoloading.
-include __DIR__ . '/src/minit-assets.php';
-include __DIR__ . '/src/minit-asset-cache.php';
-include __DIR__ . '/src/minit-js.php';
-include __DIR__ . '/src/minit-css.php';
-include __DIR__ . '/src/minit-plugin.php';
-include __DIR__ . '/src/admin.php';
-include __DIR__ . '/src/helpers.php';
+require_once __DIR__ . '/src/minit-assets.php';
+require_once __DIR__ . '/src/minit-asset-cache.php';
+require_once __DIR__ . '/src/minit-js.php';
+require_once __DIR__ . '/src/minit-css.php';
+require_once __DIR__ . '/src/minit-plugin.php';
+require_once __DIR__ . '/src/admin.php';
+require_once __DIR__ . '/src/helpers.php';
 
 if ( ! function_exists( 'add_action' ) ) {
 	return;
