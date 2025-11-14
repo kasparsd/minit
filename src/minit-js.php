@@ -49,7 +49,6 @@ class Minit_Js extends Minit_Assets {
 			return $todo;
 		}
 
-		// @todo create a fallback for apply_filters( 'minit-js-in-footer', true )
 		wp_register_script(
 			self::ASSET_HANDLE,
 			$url,
