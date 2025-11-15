@@ -91,9 +91,13 @@ class Minit_Css extends Minit_Assets {
 		}
 
 		// Make all local asset URLs absolute
-		$content = preg_replace(
-			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-			sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
+		$content = preg_replace_callback(
+			'/url\(\s*(?!["\'\s]*(?:data:|https?:|\/\/))(.*?)\s*\)/i',
+			fn ( $matches ) => sprintf(
+				"url('%s/%s')",
+				$this->handler->base_url . dirname( $src ),
+				trim( $matches[1], '\'" ' )
+			),
 			$content
 		);
 
