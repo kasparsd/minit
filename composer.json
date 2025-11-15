@@ -1,33 +1,33 @@
 {
-  "name": "kasparsd/minit",
-  "description": "A WordPress plugin to combine CSS and Javascript files",
-  "homepage": "https://github.com/kasparsd/minit",
-  "keywords": [
-    "wordpress",
-    "plugins",
-    "css",
-    "js",
-    "combine",
-    "minify",
-    "concatenate",
-    "optimization",
-    "performance",
-    "speed"
-  ],
-  "support": {
-    "issues": "https://github.com/kasparsd/minit/issues",
-    "source": "https://github.com/kasparsd/minit"
-  },
-  "license": "GPL-2.0-or-later",
-  "authors": [{
-    "name": "Kaspars Dambis",
-    "email": "hi@kaspars.net",
-    "homepage": "https://kaspars.net"
-  }],
-  "type": "wordpress-plugin",
-  "require": {
-    "php": ">=7.4"
-  },
+	"name": "kasparsd/minit",
+	"description": "A WordPress plugin to combine CSS and Javascript files",
+	"homepage": "https://github.com/kasparsd/minit",
+	"keywords": [
+		"wordpress",
+		"plugins",
+		"css",
+		"js",
+		"combine",
+		"minify",
+		"concatenate",
+		"optimization",
+		"performance",
+		"speed"
+	],
+	"support": {
+		"issues": "https://github.com/kasparsd/minit/issues",
+		"source": "https://github.com/kasparsd/minit"
+	},
+	"license": "GPL-2.0-or-later",
+	"authors": [{
+		"name": "Kaspars Dambis",
+		"email": "hi@kaspars.net",
+		"homepage": "https://kaspars.net"
+	}],
+	"type": "wordpress-plugin",
+	"require": {
+		"php": ">=7.4"
+	},
 	"repositories": [
 		{
 			"type": "composer",
@@ -38,30 +38,30 @@
 			]
 		}
 	],
-  "require-dev": {
-    "wp-coding-standards/wpcs": "^3.2",
-    "roots/wordpress": "^6.8",
-    "wp-phpunit/wp-phpunit": "^6.8",
-    "yoast/phpunit-polyfills": "^4.0",
-    "phpunit/phpunit": "^9",
-    "wpackagist-theme/twentytwentyfive": "^1.3"
-  },
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "roots/wordpress-core-installer": true,
-      "composer/installers": true
-    }
-  },
-  "scripts": {
-    "lint": [
-      "phpcs ."
-    ],
-    "format": [
-      "phpcbf ."
-    ],
-    "test": [
-      "phpunit"
-    ]
-  }
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.2",
+		"roots/wordpress": "^6.8",
+		"wp-phpunit/wp-phpunit": "^6.8",
+		"yoast/phpunit-polyfills": "^4.0",
+		"phpunit/phpunit": "^9",
+		"wpackagist-theme/twentytwentyfive": "^1.3"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"roots/wordpress-core-installer": true,
+			"composer/installers": true
+		}
+	},
+	"scripts": {
+		"lint": [
+			"phpcs ."
+		],
+		"format": [
+			"phpcbf ."
+		],
+		"test": [
+			"phpunit"
+		]
+	}
 }
