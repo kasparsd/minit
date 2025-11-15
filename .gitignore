@@ -1,2 +1,7 @@
-/vendor
-/node_modules
+/vendor/
+/node_modules/
+/wordpress/
+/wp-content/
+
+.phpunit.result.cache
+phpunit.xml

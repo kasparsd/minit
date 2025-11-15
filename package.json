@@ -1,0 +1,12 @@
+{
+	"devDependencies": {
+		"@wordpress/env": "^10.35.0"
+	},
+	"scripts": {
+		"start": "wp-env start --xdebug",
+		"wp-env": "wp-env",
+		"cli": "wp-env run cli --env-cwd=wp-content/plugins/minit",
+		"test": "npm run cli -- composer test",
+		"composer": "npm run cli -- composer"
+	}
+}

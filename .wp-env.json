@@ -1,5 +1,8 @@
 {
-	"plugins": [
-		"."
-	]
+	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"core": "./wordpress",
+	"mappings": {
+		"wp-content": "./wp-content",
+		"wp-content/plugins/minit": "."
+	}
 }

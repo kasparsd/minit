@@ -29,11 +29,16 @@
     "php": ">=7.4"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "^3.2"
+    "wp-coding-standards/wpcs": "^3.2",
+    "roots/wordpress": "^6.8",
+    "wp-phpunit/wp-phpunit": "^6.8",
+    "yoast/phpunit-polyfills": "^4.0",
+    "phpunit/phpunit": "^9"
   },
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "roots/wordpress-core-installer": true
     }
   },
   "scripts": {
@@ -42,6 +47,9 @@
     ],
     "format": [
       "phpcbf ."
+    ],
+    "test": [
+      "phpunit"
     ]
   }
 }
