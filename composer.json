@@ -62,8 +62,11 @@
 		}
 	},
 	"scripts": {
+		"lint:phpcs": "phpcs",
+		"lint:phpstan": "phpstan --memory-limit=1G analyse",
 		"lint": [
-			"phpcs"
+			"@composer lint:phpcs",
+			"@composer lint:phpstan"
 		],
 		"format": [
 			"phpcbf"
