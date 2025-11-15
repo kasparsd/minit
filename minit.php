@@ -6,7 +6,7 @@
  * GitHub Plugin URI: https://github.com/kasparsd/minit
  * Update URI: https://updates.wpelevator.com/wp-json/update-pilot/v1/plugins
  * Description: Combine JS and CSS files and serve them from the uploads folder.
- * Version: 3.1.0
+ * Version: 3.1.1
  * Author: Kaspars Dambis
  * Author URI: https://kaspars.net
  * Require PHP: 7.4
