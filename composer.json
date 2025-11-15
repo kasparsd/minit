@@ -48,6 +48,9 @@
 		"wpackagist-plugin/query-monitor": "^3.20"
 	},
 	"config": {
+		"platform": {
+			"php": "7.4"
+		},
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true,
 			"roots/wordpress-core-installer": true,
