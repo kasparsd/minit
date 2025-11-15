@@ -11,6 +11,8 @@
 		"test": "npm run cli -- composer test",
 		"composer": "npm run cli -- composer",
 		"lint": "run-p lint:*",
-		"lint:php": "npm run cli -- composer lint"
+		"lint:php": "npm run cli -- composer lint",
+		"format": "run-p format:*",
+		"format:php": "npm run cli -- composer format"
 	}
 }
