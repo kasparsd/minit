@@ -1,0 +1,16 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "XDebug",
+			"type": "php",
+			"request": "launch",
+			"port": 9003,
+			"pathMappings": {
+				"/var/www/html": "${workspaceFolder}/wordpress",
+				"/var/www/html/wp-content": "${workspaceFolder}/wp-content",
+				"/var/www/html/wp-content/plugins/minit": "${workspaceFolder}"
+			}
+		}
+	]
+}
