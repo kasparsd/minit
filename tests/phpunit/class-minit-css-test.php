@@ -36,7 +36,7 @@ class Minit_CSS_Test extends WP_UnitTestCase {
 	public function test_resolve_urls() {
 		$minit_css = new Minit_Css(
 			Minit_Plugin::instance(),
-			new Minit_Asset_Cache( WP_CONTENT_DIR . '/minit-test', 'version' )
+			new Minit_Asset_Cache( '/resolve/urls/minit-test', 'version' )
 		);
 
 		wp_enqueue_style( 'minit-css-url-paths', 'https://example.com/default.css' );
@@ -75,7 +75,7 @@ class Minit_CSS_Test extends WP_UnitTestCase {
 	public function test_resolve_imports() {
 		$minit_css = new Minit_Css(
 			Minit_Plugin::instance(),
-			new Minit_Asset_Cache( WP_CONTENT_DIR . '/minit-test', 'version' )
+			new Minit_Asset_Cache( '/resolve/imports/minit-test', 'version' )
 		);
 
 		wp_enqueue_style( 'minit-css-imports', 'https://example.com/imports.css' );
