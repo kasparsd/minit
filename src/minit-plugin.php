@@ -66,26 +66,22 @@ class Minit_Plugin {
 	 *
 	 * @return string
 	 */
-	public function basename() {
+	public function basename(): string {
 		return plugin_basename( $this->plugin_file );
 	}
 
 	/**
 	 * Bump the cache version to bust the cache.
-	 *
-	 * @return boolean
 	 */
-	public function cache_bump() {
-		return $this->minit_cache->bump();
+	public function cache_bump(): void {
+		$this->minit_cache->bump();
 	}
 
 	/**
 	 * Delete all the cache files.
-	 *
-	 * @return boolean
 	 */
-	public function cache_purge() {
-		return $this->minit_cache->purge();
+	public function cache_purge(): void {
+		$this->minit_cache->purge();
 	}
 
 	public function init() {
