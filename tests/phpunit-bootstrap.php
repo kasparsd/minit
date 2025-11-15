@@ -17,11 +17,11 @@ if ( is_readable( $wp_env_tests_dir . '/wp-tests-config.php' ) ) {
 
 global $wp_tests_options; // WP testing library uses this to define option values.
 
-$wp_tests_options = [
-	'active_plugins' => [
+$wp_tests_options = array(
+	'active_plugins' => array(
 		'minit/minit.php',
-	],
-];
+	),
+);
 
 // Include all helper functions.
 require_once $wp_tests_dir . '/includes/functions.php';
