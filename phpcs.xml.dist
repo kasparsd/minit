@@ -18,6 +18,5 @@
 	<exclude-pattern>/node_modules/</exclude-pattern>
 	<exclude-pattern>/vendor/</exclude-pattern>
 	<exclude-pattern>/wordpress/</exclude-pattern>
-	<exclude-pattern>/wp-content/themes/</exclude-pattern>
-	<exclude-pattern>/wp-content/uploads/</exclude-pattern>
+	<exclude-pattern>/wp-content/(?!plugins/minit/)</exclude-pattern>
 </ruleset>
