@@ -40,7 +40,31 @@ class Minit_CSS_Test extends WP_UnitTestCase {
 		$this->assertEquals(
 			'body { background-image: url(\'http://localhost:8888/path/to/path/to/image.png\'); }',
 			$minit_css->minit_item( 'body { background-image: url( "path/to/image.png" ); }', 'minit-css', '/path/to/css.css' ),
-			'stylesheets with no media query (default) are included in minit'
+			'relative paths wrapped in quotes'
+		);
+
+		$this->assertEquals(
+			'body { background-image: url(\'http://localhost:8888/path/to/direct/image.png\'); }',
+			$minit_css->minit_item( 'body { background-image: url(direct/image.png); }', 'minit-css', '/path/to/css.css' ),
+			'relative paths without quotes'
+		);
+
+		$this->assertEquals(
+			'body { background-image: url(\'http://localhost:8888/path/to/some/image.jpeg\'); }',
+			$minit_css->minit_item( 'body { background-image: url(  "some/image.jpeg\'    ); }', 'minit-css', '/path/to/css.css' ),
+			'mixed quotes and spaces'
+		);
+
+		$this->assertEquals(
+			'body { background-image: url( data:image/gif;base64,R0lGODlhEAAQAMQAAO ); }',
+			$minit_css->minit_item( 'body { background-image: url( data:image/gif;base64,R0lGODlhEAAQAMQAAO ); }', 'minit-css', '/path/to/css.css' ),
+			'data uris are kept intact'
+		);
+
+		$this->assertEquals(
+			'body { background-image: url( "http://example.jpeg" ); }',
+			$minit_css->minit_item( 'body { background-image: url( "http://example.jpeg" ); }', 'minit-css', '/path/to/css.css' ),
+			'absolute urls are kept intact'
 		);
 	}
 }
