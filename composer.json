@@ -55,10 +55,10 @@
 	},
 	"scripts": {
 		"lint": [
-			"phpcs ."
+			"phpcs"
 		],
 		"format": [
-			"phpcbf ."
+			"phpcbf"
 		],
 		"test": [
 			"phpunit"

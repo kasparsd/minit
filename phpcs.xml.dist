@@ -2,7 +2,11 @@
 <ruleset name="WordPress Coding Standards for Plugins">
 	<arg name="extensions" value="php" />
 	<arg name="colors" />
+	<arg name="parallel" value="16" />
 	<arg value="s" /><!-- Show sniff codes in all reports. -->
+	<arg value="p" /><!-- Show progress. -->
+
+	<file>.</file>
 
 	<rule ref="WordPress-Core">
 		<exclude name="WordPress.Files.FileName" /><!-- We'll be switching to PSR-4 naming soon. -->
@@ -11,12 +15,9 @@
 		<exclude name="WordPress.NamingConventions.ValidHookName.UseUnderscores" />
 	</rule>
 
-	<!--
-	<rule ref="WordPress-Docs">
-		<exclude name="Squiz.Commenting.FileComment" />
-	</rule>
-	-->
-
-	<exclude-pattern>/node_modules</exclude-pattern>
-	<exclude-pattern>/vendor</exclude-pattern>
+	<exclude-pattern>/node_modules/</exclude-pattern>
+	<exclude-pattern>/vendor/</exclude-pattern>
+	<exclude-pattern>/wordpress/</exclude-pattern>
+	<exclude-pattern>/wp-content/themes/</exclude-pattern>
+	<exclude-pattern>/wp-content/uploads/</exclude-pattern>
 </ruleset>
