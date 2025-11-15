@@ -4,5 +4,8 @@
 	"mappings": {
 		"wp-content": "./wp-content",
 		"wp-content/plugins/minit": "."
+	},
+	"config": {
+		"WP_DEFAULT_THEME": "twentytwentyfive"
 	}
 }
