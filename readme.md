@@ -12,7 +12,6 @@ Install [using Composer](https://packagist.org/packages/kasparsd/minit):
 
 or by manually downloading the [latest release file](https://github.com/kasparsd/minit/releases/latest).
 
-
 ## How it Works
 
 - Concatenates all CSS files and Javascript files one file for each type (`.js` and `.css`), and stores them in the WordPress uploads directory under `/minit`. See the configuration section below for how to exclude files from the bundle.
@@ -21,12 +20,10 @@ or by manually downloading the [latest release file](https://github.com/kasparsd
 
 - Loads the concatenated Javascript file in the footer as defered. This will probably break all inline scripts that rely on jQuery being available. See the configuration section below for how to disable this.
 
-
 ## Screenshots
 
 1. [All CSS files combined in a single file](screenshot-1.png)
 2. [All external Javascript files loading asynchronously](screenshot-2.png)
-
 
 ## Configuration
 
