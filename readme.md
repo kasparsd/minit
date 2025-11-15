@@ -84,6 +84,20 @@ Use this filter to apply basic CSS minification to the created bundle:
 - [Minit CDN](https://github.com/LQ2-apostrophe/minit-cdn)
 - [Minit Manual Inclusion](https://github.com/dimadin/minit-manual-inclusion)
 
+## Contribute
+
+Requirements:
+
+- Docker
+- Node.js
+- Composer
+
+To setup the development environment:
+
+1. Clone this repository.
+2. Run `npm install` to install the dependencies (which also runs `composer install`).
+3. Run `npm run start` to start the included WordPress development environment.
+4. Run `npm run test` and `npm run lint` to run the tests.
 
 ## Credits
 
