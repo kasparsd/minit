@@ -134,7 +134,7 @@ class Minit_Js extends Minit_Assets {
 	}
 
 	/**
-	 * Fallback to defering for older versions of WP.
+	 * Fallback to deferring for older versions of WP.
 	 *
 	 * @param  string $tag    Script tag.
 	 * @param  string $handle Script handle or ID.
@@ -151,7 +151,7 @@ class Minit_Js extends Minit_Assets {
 			return $tag;
 		}
 
-		// Bail if defered already.
+		// Bail if deferred already.
 		if ( false !== stripos( $tag, ' defer' ) ) {
 			return $tag;
 		}

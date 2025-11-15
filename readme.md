@@ -18,7 +18,7 @@ or by manually downloading the [latest release file](https://github.com/kasparsd
 
 - Uses the combined version numbers of the enqueued assets to version the bundles.
 
-- Loads the concatenated Javascript file in the footer as defered. This will probably break all inline scripts that rely on jQuery being available. See the configuration section below for how to disable this.
+- Loads the concatenated Javascript file in the footer as deferred. This will probably break all inline scripts that rely on jQuery being available. See the configuration section below for how to disable this.
 
 ## Screenshots
 
@@ -29,7 +29,7 @@ or by manually downloading the [latest release file](https://github.com/kasparsd
 
 See the [Wiki](https://github.com/kasparsd/minit/wiki) for additional documentation.
 
-### Disable Defering Javascript
+### Disable Deferring Javascript
 
 Use the `minit-script-tag-async` filter (legacy name when async was preferred) to load the concatenated Javascript synchronously:
 
