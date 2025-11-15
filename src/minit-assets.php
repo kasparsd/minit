@@ -4,8 +4,16 @@ abstract class Minit_Assets {
 
 	public $queue = array();
 	public $done = array();
+
+	/**
+	 * Instance of either WP scripts or styles.
+	 *
+	 * @var WP_Dependencies
+	 */
 	public $handler;
+
 	public $extension;
+
 	public $revision;
 
 	public function __construct( $handler, $extension = null, $revision = null ) {
@@ -19,12 +27,9 @@ abstract class Minit_Assets {
 		$this->revision = $revision;
 	}
 
-
 	abstract public function file_cache();
 
-
 	abstract public function init();
-
 
 	/**
 	 * Register queued assets for Minit processing.
