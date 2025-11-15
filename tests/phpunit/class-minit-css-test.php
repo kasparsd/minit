@@ -4,7 +4,7 @@ class Minit_CSS_Test extends WP_UnitTestCase {
 	public function test_media_query_excluded() {
 		$minit_css = new Minit_Css(
 			Minit_Plugin::instance(),
-			new Minit_Asset_Cache( WP_CONTENT_DIR . '/minit-test', 'version' )
+			new Minit_Asset_Cache( '/cache/to/minit-test', 'version' )
 		);
 
 		wp_enqueue_style( 'minit-css-media-default', 'https://example.com/default.css' );
