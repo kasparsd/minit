@@ -1,0 +1,10 @@
+parameters:
+	level: 5
+	paths:
+		- src
+		- tests
+	scanDirectories:
+		- wordpress
+		- vendor
+	excludePaths:
+		- node_modules (?)

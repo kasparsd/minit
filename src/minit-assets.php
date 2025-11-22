@@ -8,7 +8,7 @@ abstract class Minit_Assets {
 	/**
 	 * Instance of either WP scripts or styles.
 	 *
-	 * @var WP_Dependencies
+	 * @var WP_Styles|WP_Scripts
 	 */
 	public $handler;
 

@@ -91,9 +91,13 @@ class Minit_Css extends Minit_Assets {
 		}
 
 		// Make all local asset URLs absolute
-		$content = preg_replace(
-			'/url\(["\' ]?+(?!data:|https?:|\/\/)(.*?)["\' ]?\)/i',
-			sprintf( "url('%s/$1')", $this->handler->base_url . dirname( $src ) ),
+		$content = preg_replace_callback(
+			'/url\(\s*(?!["\'\s]*(?:data:|https?:|\/\/))(.*?)\s*\)/i',
+			fn ( $matches ) => sprintf(
+				"url('%s/%s')",
+				$this->handler->base_url . dirname( $src ),
+				trim( $matches[1], '\'" ' )
+			),
 			$content
 		);
 
@@ -120,11 +124,8 @@ class Minit_Css extends Minit_Assets {
 			return $content;
 		}
 
-		// Ignore these media queries.
-		$allowlist = array( null, '', 'all', 'screen' );
-
-		// Exclude from Minit if media query specified.
-		if ( ! in_array( $this->handler->registered[ $handle ]->args, $allowlist, true ) ) {
+		// Exclude from Minit if non-screen media query specified.
+		if ( ! empty( $this->handler->registered[ $handle ]->args ) && ! in_array( $this->handler->registered[ $handle ]->args, array( 'all', 'screen' ), true ) ) {
 			return false;
 		}
 

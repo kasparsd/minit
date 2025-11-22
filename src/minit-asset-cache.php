@@ -146,7 +146,7 @@ class Minit_Asset_Cache {
 	public function files() {
 		$files = glob( $this->dir() . '/*', GLOB_NOSORT );
 
-		if ( ! empty( $files ) && is_array( $files ) ) {
+		if ( ! empty( $files ) ) {
 			return $files;
 		}
 
