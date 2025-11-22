@@ -86,7 +86,8 @@ abstract class Minit_Assets {
 		// Allow others to exclude handles from Minit.
 		$excluded_handles = (array) apply_filters(
 			'minit-exclude-' . $this->extension,
-			array()
+			array(),
+			$handles
 		);
 
 		$excluded = array_intersect( $handles, $excluded_handles );

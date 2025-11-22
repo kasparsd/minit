@@ -39,11 +39,13 @@ Use the `minit-script-tag-async` filter (legacy name when async was preferred) t
 
 Use the `minit-exclude-js` and `minit-exclude-css` filters to exclude files from the concatenated bundles:
 
-    add_filter( 'minit-exclude-js', function( $handles ) {
+    add_filter( 'minit-exclude-js', function( $handles, $enqueued ) {
         $handles[] = 'jquery';
 
         return $handles;
-    } );
+    }, 10, 2 );
+
+where `$handles` is an array of handles to exclude, and `$enqueued` is an array of all enqueued handles of the given type.
 
 ### Integrate with Block Themes
 
