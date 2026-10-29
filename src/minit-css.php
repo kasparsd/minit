@@ -63,12 +63,7 @@ class Minit_Css extends Minit_Assets {
 
 	public function minit_item( $content, $handle, $src ) {
 		// Append all inline styles right after to preserve order.
-		$inline_styles = $this->handler->get_data( $handle, 'after' );
-
-		if ( ! empty( $inline_styles ) ) {
-			$content .= implode( "\n", $inline_styles );
-		}
-
+		
 		if ( empty( $content ) ) {
 			return $content;
 		}
@@ -131,6 +126,13 @@ class Minit_Css extends Minit_Assets {
 
 		// Exclude all items with conditionals.
 		if ( ! empty( $this->handler->registered[ $handle ]->extra['conditional'] ) ) {
+			return false;
+		}
+
+		// Exclude styles with inline "after" CSS.
+		$inline_styles = $this->handler->get_data( $handle, 'after' );
+
+		if ( ! empty( $inline_styles ) ) {
 			return false;
 		}
 
