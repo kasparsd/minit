@@ -127,6 +127,12 @@ class Minit_Css extends Minit_Assets {
 			return false;
 		}
 
+		// Exclude styles with RTL variants: their -rtl.css file is printed
+		// by WordPress only when the item itself is not bundled.
+		if ( ! empty( $this->handler->registered[ $handle ]->extra['rtl'] ) ) {
+			return false;
+		}
+
 		// Exclude styles with inline "after" CSS.
 		$inline_styles = $this->handler->get_data( $handle, 'after' );
 
