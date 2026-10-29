@@ -1,0 +1,72 @@
+name: Tag Release
+
+# Creates the release tag for packages that changed in the release pull
+# request merge, and opens a draft GitHub release with the notes from the
+# changesets. Publishing the draft (a maintainer click) fires the
+# "release: published" event, which runs deploy.yml to deploy to
+# WordPress.org and attach the ZIP artifact. GITHUB_TOKEN-created
+# releases cannot fire that event, and a maintainer click keeps the
+# WordPress.org deployment an explicit, intentional step.
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-release
+  cancel-in-progress: true
+
+jobs:
+
+  tag:
+    name: Tag the release and draft the GitHub release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        # Full history and all tags: wp-release reads the existing release
+        # tags for its only-when-absent checks, and for the previousTag of
+        # the release notes.
+        with:
+          fetch-depth: 0
+
+      # wp-release requires Node.js >=22.12; the repo-wide .nvmrc still pins
+      # Node 20 for the wp-env development environment.
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install NPM dependencies
+        run: npm ci --ignore-scripts
+
+      # Pushes the <version> tag when this push released a package, like
+      # the merge of a release pull request. Tags are only created when
+      # absent, and the current release tag already exists on any push
+      # without a version bump, so regular master pushes no-op here.
+      - name: Tag the release
+        id: tag
+        run: npx wp-release changeset-tag --since HEAD^1 --push --github-output
+
+      # The tag result lists each tag with its notes and pre-release flag;
+      # GitHub reads them straight out of the JSON with fromJSON().
+      # fromJSON() would fail on an empty output of a skipped step, but the
+      # tag step above always runs and emits at least an empty tags list.
+      - name: Draft the GitHub release
+        if: fromJSON(steps.tag.outputs.result).tags[0] != null
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ fromJSON(steps.tag.outputs.result).tags[0].tag }}
+          TITLE: ${{ fromJSON(steps.tag.outputs.result).tags[0].title }}
+          NOTES: ${{ fromJSON(steps.tag.outputs.result).tags[0].notes }}
+          PRERELEASE: ${{ fromJSON(steps.tag.outputs.result).tags[0].prerelease }}
+        run: |
+          ARGS=( "$TAG" --title "$TITLE" --notes "$NOTES" --draft )
+          if [ "$PRERELEASE" = "true" ]; then
+            ARGS+=( --prerelease )
+          fi
+          gh release create "${ARGS[@]}"

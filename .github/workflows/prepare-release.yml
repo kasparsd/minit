@@ -1,0 +1,74 @@
+name: Prepare Release
+
+# Consumes pending changesets on master and opens or updates a release pull
+# request with the version bumps and changelog entries.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      # Only run when a changeset is added (or removed), or when the release
+      # configuration changes, instead of on every master push.
+      - '.changeset/**'
+      - 'wp-release.config.mjs'
+      - '.github/workflows/prepare-release.yml'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Open or update the release pull request
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # wp-release requires Node.js >=22.12; the repo-wide .nvmrc still pins
+      # Node 20 for the wp-env development environment.
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      # --ignore-scripts skips the "preinstall" composer script; the version
+      # step needs only the Node tooling.
+      - name: Install NPM dependencies
+        run: npm ci --ignore-scripts
+
+      # Applies the pending changesets to the version files (plugin header
+      # Version and readme.txt Stable tag) and CHANGELOG.md, and removes the
+      # consumed changeset files. With no pending releases, it leaves the
+      # working tree alone.
+      - name: Version the pending changesets
+        id: version
+        run: npx wp-release changeset-version --github-output
+
+      # Commits the versioned files to the release branch and opens the
+      # pull request, or updates the existing release pull request when one
+      # is already open; puts the branch away when it's merged. Skipped
+      # when no release is pending (releases is an empty list then), since
+      # create-pull-request would otherwise try to create a branch named
+      # "release/". The expressions are null-safe: releases[0] just reads
+      # as null on the empty list, and the version step always runs, so
+      # fromJSON() never sees a skipped step's empty output.
+      - name: Open or update the release pull request
+        if: fromJSON(steps.version.outputs.result).releases[0] != null
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: release/${{ fromJSON(steps.version.outputs.result).releases[0].nextVersion }}
+          delete-branch: true
+          commit-message: 'Release ${{ fromJSON(steps.version.outputs.result).releases[0].nextVersion }}'
+          title: 'Release ${{ fromJSON(steps.version.outputs.result).releases[0].nextVersion }}'
+          body: |
+            ${{ fromJSON(steps.version.outputs.result).releases[0].changelog }}
+
+            ---
+
+            Automated release pull request generated from the pending [changesets](https://github.com/kasparsd/minit/tree/master/.changeset). Merging it creates the release tag, the draft GitHub release, and after publishing the release, the WordPress.org deployment.
