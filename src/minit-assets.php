@@ -150,6 +150,8 @@ abstract class Minit_Assets {
 			return $cache['url'];
 		}
 
+		$excluded = array();
+
 		foreach ( $this->queue as $handle ) {
 			// Get the relative URL of the asset.
 			$src = $this->get_asset_relative_path( $handle );
@@ -158,14 +160,24 @@ abstract class Minit_Assets {
 			if ( ! empty( $src ) && is_readable( ABSPATH . $src ) ) {
 				$item = $this->minit_item( file_get_contents( ABSPATH . $src ), $handle, $src );
 
-				$done[ $handle ] = apply_filters(
-					'minit-item-' . $this->extension,
-					$item,
-					$this->handler,
-					$handle
-				);
+				// Handle marked as excluded by minit_item: keep in the print
+				// queue, do not mark as done, so it gets printed by
+				// WordPress after the bundle.
+				if ( false === $item ) {
+					$excluded[] = $handle;
+				} else {
+					$done[ $handle ] = apply_filters(
+						'minit-item-' . $this->extension,
+						$item,
+						$this->handler,
+						$handle
+					);
+				}
 			}
 		}
+
+		// Remove excluded handles from the queue without marking them as done.
+		$this->queue = array_diff( $this->queue, $excluded );
 
 		if ( empty( $done ) ) {
 			return false;
@@ -221,11 +233,16 @@ abstract class Minit_Assets {
 	/**
 	 * Process the contents of each file.
 	 *
+	 * Returning `false` excludes the item from the bundle: it will not be
+	 * marked as done and will be printed by WordPress in its position
+	 * among the other items.
+	 *
 	 * @param  string $source Asset source
 	 * @param  string $handle Asset handle
 	 * @param  string $src    Relative URL of the asset
 	 *
-	 * @return string         Asset source
+	 * @return string|false   Processed asset source or `false` to exclude
+	 *                        from the bundle.
 	 */
 	public function minit_item( $source, $handle, $src ) {
 		return $source;
