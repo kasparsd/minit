@@ -120,7 +120,22 @@ abstract class Minit_Assets {
 
 		// Include individual scripts versions in the cache key.
 		foreach ( $handles as $handle ) {
-			$ver[] = sprintf( '%s-%s', $handle, $this->handler->registered[ $handle ]->ver );
+			$dependent = $this->handler->registered[ $handle ];
+
+			$ver[] = sprintf( '%s-%s', $handle, $dependent->ver );
+
+			// Attributes and extra data (like media queries or inline
+			// CSS) can change how the handle is handled, so they must be
+			// part of the cache key, not just the version.
+			$ver[] = md5(
+				wp_json_encode(
+					array(
+						'src'   => $dependent->src,
+						'args'  => $dependent->args,
+						'extra' => $dependent->extra,
+					)
+				)
+			);
 		}
 
 		return md5( 'minit-' . implode( '-', $ver ) );
