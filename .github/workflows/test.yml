@@ -75,7 +75,9 @@ jobs:
   # a release note or an empty one for an explicit no-release decision.
   changeset:
     name: Check the changeset
-    if: github.event_name == 'pull_request'
+    # Changesets are for regular feature changes: release branches carry
+    # the release themselves, so checking them would fail with no changes.
+    if: github.event_name == 'pull_request' && ! startsWith( github.head_ref, 'release/' )
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
