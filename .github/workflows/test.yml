@@ -2,6 +2,9 @@ name: Test
 
 on:
   push:
+    branches:
+      - master
+      - develop
   pull_request:
 
 jobs:
@@ -42,7 +45,8 @@ jobs:
 
   # Sanity check: the release packaging must work from the repo root and
   # produce a plugin ZIP. Unsigned and without the embedded manifest on
-  # purpose: this runs on every push to any branch, and the release ZIP
+  # purpose: this runs on trunk branch pushes and pull requests, and the
+  # release ZIP
   # with embedded checksums is only built in deploy.yml.
   zip:
     name: Zip
