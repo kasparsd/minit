@@ -21,12 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # wp-release requires Node.js >=22.12; the repo-wide .nvmrc still pins
-      # Node 20 for the wp-env development environment.
+      # wp-release requires Node.js >=22.12; .nvmrc is the single source of
+      # the Node version across the workflows and local development.
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: 'npm'
 
       # --ignore-scripts skips the "preinstall" composer script; packaging
