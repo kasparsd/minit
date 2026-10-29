@@ -3,10 +3,10 @@ name: Tag Release
 # Creates the release tag for packages that changed in the release pull
 # request merge, and opens a draft GitHub release with the notes from the
 # changesets. Publishing the draft (a maintainer click) fires the
-# "release: published" event, which runs deploy.yml to deploy to
-# WordPress.org and attach the ZIP artifact. GITHUB_TOKEN-created
-# releases cannot fire that event, and a maintainer click keeps the
-# WordPress.org deployment an explicit, intentional step.
+# "release: published" event, which runs release-zip.yml to attach the
+# packaged ZIP artifact. GITHUB_TOKEN-created releases cannot fire that
+# event, and a maintainer click keeps the release publication an explicit,
+# intentional step.
 on:
   push:
     branches:

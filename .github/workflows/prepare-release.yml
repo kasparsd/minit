@@ -71,4 +71,4 @@ jobs:
 
             ---
 
-            Automated release pull request generated from the pending [changesets](https://github.com/kasparsd/minit/tree/master/.changeset). Merging it creates the release tag, the draft GitHub release, and after publishing the release, the WordPress.org deployment.
+            Automated release pull request generated from the pending [changesets](https://github.com/kasparsd/minit/tree/master/.changeset). Merging it creates the release tag and the draft GitHub release; publishing the release attaches the packaged ZIP artifact.
