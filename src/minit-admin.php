@@ -1,20 +1,29 @@
 <?php
 
-class Minit_Admin {
+class Minit_Admin
+{
 
 	protected $plugin;
 
-	public function __construct( $plugin ) {
+	public function __construct($plugin)
+	{
 		$this->plugin = $plugin;
 	}
 
-	public function init() {
+	public function init()
+	{
 		// Add a Purge Cache link to the plugin list
 		// @todo Enable this for multisite somehow
-		add_filter( 'plugin_action_links_' . $this->plugin->basename(), array( $this, 'plugin_action_link_cache_bump' ) );
+		add_filter('plugin_action_links_' . $this->plugin->basename(), array($this, 'plugin_action_link_cache_bump'));
 
 		// Maybe purge minit cache
-		add_action( 'admin_init', array( $this, 'maybe_purge_cache' ) );
+		add_action('admin_init', array($this, 'maybe_purge_cache'));
+		add_action(
+			'admin_bar_menu',
+			array($this, 'admin_bar_purge_button'),
+			999
+		);
+
 	}
 
 	/**
@@ -24,11 +33,12 @@ class Minit_Admin {
 	 *
 	 * @return array
 	 */
-	public function plugin_action_link_cache_bump( $links ) {
+	public function plugin_action_link_cache_bump($links)
+	{
 		$links[] = sprintf(
 			'<a href="%s">%s</a>',
-			wp_nonce_url( add_query_arg( 'purge_minit', true ), 'purge_minit' ),
-			__( 'Purge Cache', 'minit' )
+			wp_nonce_url(add_query_arg('purge_minit', true), 'purge_minit'),
+			__('Purge Cache', 'minit')
 		);
 
 		return $links;
@@ -39,11 +49,12 @@ class Minit_Admin {
 	 *
 	 * @return void
 	 */
-	public function maybe_purge_cache() {
-		if ( isset( $_GET['purge_minit'] ) && check_admin_referer( 'purge_minit' ) ) {
+	public function maybe_purge_cache()
+	{
+		if (isset($_GET['purge_minit']) && check_admin_referer('purge_minit')) {
 			$this->plugin->cache_bump();
 
-			add_action( 'admin_notices', array( $this, 'cache_purge_notice' ) );
+			add_action('admin_notices', array($this, 'cache_purge_notice'));
 		}
 	}
 
@@ -52,10 +63,29 @@ class Minit_Admin {
 	 *
 	 * @return void
 	 */
-	public function cache_purge_notice() {
+	public function cache_purge_notice()
+	{
 		printf(
 			'<div class="updated"><p>%s</p></div>',
-			__( 'Success: Minit cache purged.', 'minit' )
+			__('Success: Minit cache purged.', 'minit')
+		);
+	}
+	public function admin_bar_purge_button($wp_admin_bar)
+	{
+
+		if (!current_user_can('manage_options')) {
+			return;
+		}
+
+		$wp_admin_bar->add_node(
+			array(
+				'id' => 'minit-purge-cache',
+				'title' => __('Purge Minit', 'minit'),
+				'href' => wp_nonce_url(
+					add_query_arg('purge_minit', true),
+					'purge_minit'
+				),
+			)
 		);
 	}
 }
