@@ -3,7 +3,7 @@
 Contributors: kasparsd
 Tags: performance, speed, minify, concatenate, css, javascript
 License: GPLv2 or later
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 
 Places all your CSS and Javascript files into dedicated bundles that can be cached by browsers and re-used between requests. It assumes that a single request with slightly larger transfer size is more performant than multiple smaller requests (even with HTTP/2 multiplexing).
 
@@ -103,6 +103,12 @@ To setup the development environment:
 Created by [Kaspars Dambis](https://kaspars.net) and [contributors](https://github.com/kasparsd/minit/graphs/contributors).
 
 == Changelog ==
+
+
+= 3.2.1 =
+
+* Handle styles excluded from the bundle by printing them separately instead of silently dropping them. This affects stylesheets with inline "after" CSS and those with non-screen media queries (or conditional attributes): they are now printed by WordPress in their original position, with their inline styles intact and in the correct order.
+* Adopt changeset-driven releases with @wpelevator/wp-release: automated version bumps, draft GitHub releases and standalone ZIP packages with an embedded checksums manifest. Releases are distributed as self-hosted downloads; the plugin is not published to the WordPress.org repository.
 
 = 3.2.0 =
 
