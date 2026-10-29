@@ -1,0 +1,50 @@
+name: Release ZIP
+
+# The releases are distributed as standalone ZIPs, not through the
+# WordPress.org plugin repository. Publishing the draft release (a
+# maintainer click) attaches the packaged ZIP with the embedded checksums
+# manifest as a release artifact. No Subversion client or deploy secrets
+# are involved: the plugin is not hosted on WordPress.org.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+
+  zip:
+    name: Attach the release ZIP
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # wp-release requires Node.js >=22.12; .nvmrc is the single source of
+      # the Node version across the workflows and local development.
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      # --ignore-scripts skips the "preinstall" composer script; packaging
+      # needs only the Node tooling.
+      - name: Install NPM dependencies
+        run: npm ci --ignore-scripts
+
+      # Archives the repo (selection driven by .distignore) with the
+      # checksums manifest (checksums.json) embedded at the package root of
+      # the ZIP. The manifest name and embedding come from the integrity
+      # settings of wp-release.config.mjs. The manifest is unsigned for
+      # now: signing is deferred until a signing key is provisioned.
+      - name: Package the release with embedded checksums
+        run: npm run zip
+
+      # Attach the release ZIP (and its draft-source counterpoint) to the
+      # published release, pre-releases included.
+      - name: Attach release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" minit.*.zip --clobber
