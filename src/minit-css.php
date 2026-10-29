@@ -62,8 +62,6 @@ class Minit_Css extends Minit_Assets {
 	}
 
 	public function minit_item( $content, $handle, $src ) {
-		// Append all inline styles right after to preserve order.
-		
 		if ( empty( $content ) ) {
 			return $content;
 		}
