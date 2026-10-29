@@ -61,11 +61,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ fromJSON(steps.tag.outputs.result).tags[0].tag }}
-          TITLE: ${{ fromJSON(steps.tag.outputs.result).tags[0].title }}
           NOTES: ${{ fromJSON(steps.tag.outputs.result).tags[0].notes }}
           PRERELEASE: ${{ fromJSON(steps.tag.outputs.result).tags[0].prerelease }}
         run: |
-          ARGS=( "$TAG" --title "$TITLE" --notes "$NOTES" --draft )
+          ARGS=( "$TAG" --title "$TAG" --notes "$NOTES" --draft )
           if [ "$PRERELEASE" = "true" ]; then
             ARGS+=( --prerelease )
           fi
