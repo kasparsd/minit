@@ -59,12 +59,18 @@ class Minit_CSS_Inclusion_Test extends WP_UnitTestCase {
 	/**
 	 * Print the queue through the real print_styles_array filter chain.
 	 *
+	 * @param string[]|null $handles Handles to print, defaults to the standard fixture set.
+	 *
 	 * @return string Printed markup.
 	 */
-	protected function print_queue() {
+	protected function print_queue( ?array $handles = null ) {
 		ob_start();
 
-		wp_styles()->do_items( array( 'minit-simple', 'minit-inline-after', 'minit-print' ) );
+		wp_styles()->do_items(
+			null === $handles
+				? array( 'minit-simple', 'minit-inline-after', 'minit-print' )
+				: $handles
+		);
 
 		return (string) ob_get_clean();
 	}
@@ -104,6 +110,42 @@ class Minit_CSS_Inclusion_Test extends WP_UnitTestCase {
 		$this->assertLessThan( $positions['b_file'], $positions['bundle'], 'bundle printed before the excluded stylesheet' );
 		$this->assertLessThan( $positions['b_after'], $positions['b_file'], 'inline after styles printed following their stylesheet' );
 		$this->assertLessThan( $positions['c_file'], $positions['b_after'], 'enqueued order is maintained' );
+	}
+
+	/**
+	 * A stylesheet excluded from the bundle that was enqueued before bundled
+	 * handles (like a parent theme stylesheet printing separately because it
+	 * has inline styles) must cascade before the bundle. Previously the
+	 * bundle was printed before everything, letting the excluded sheet
+	 * override bundled rules such as dark mode styles.
+	 */
+	public function test_earlier_excluded_stylesheets_print_before_the_bundle() {
+		$base = sprintf( '%s/wp-content/plugins/minit/tests/fixtures', site_url() );
+
+		// Parent theme stylesheet with inline styles: excluded from the bundle.
+		wp_enqueue_style( 'minit-parent', $base . '/a.css' );
+		wp_add_inline_style( 'minit-parent', '.a-after-rule { color: red; }' );
+
+		// Child theme built on top of it: gets bundled.
+		wp_enqueue_style( 'minit-child', $base . '/d.css', array( 'minit-parent' ) );
+
+		$html = $this->print_queue( array( 'minit-parent', 'minit-child' ) );
+
+		$this->assertStringContainsString( sprintf( 'id=' . "'%s'", 'minit-css-css' ), $html, 'bundle printed' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContainsString( 'a.css', $html, 'parent stylesheet printed separately' );
+
+		$positions = array(
+			'parent' => strpos( $html, 'a.css' ),
+			'bundle' => strpos( $html, sprintf( 'id=' . "'%s'", 'minit-css-css' ) ),
+		);
+
+		$this->assertGreaterThan( -1, $positions['parent'], 'parent printed' );
+		$this->assertGreaterThan( -1, $positions['bundle'], 'bundle printed' );
+		$this->assertLessThan(
+			$positions['bundle'],
+			$positions['parent'],
+			'excluded stylesheet printed before the bundle at the position of its dependency'
+		);
 	}
 
 	/**
