@@ -3,7 +3,7 @@
 Contributors: kasparsd
 Tags: performance, speed, minify, concatenate, css, javascript
 License: GPLv2 or later
-Stable tag: 3.2.1
+Stable tag: 3.2.2
 
 Places all your CSS and Javascript files into dedicated bundles that can be cached by browsers and re-used between requests. It assumes that a single request with slightly larger transfer size is more performant than multiple smaller requests (even with HTTP/2 multiplexing).
 
@@ -104,6 +104,11 @@ Created by [Kaspars Dambis](https://kaspars.net) and [contributors](https://gith
 
 == Changelog ==
 
+
+
+= 3.2.2 =
+
+* Place the CSS bundle in the print order at the position of its first bundled stylesheet instead of always printing it first. Stylesheets excluded from the bundle (with inline "after" CSS, RTL variants, print media queries or conditionals) that were enqueued before bundled ones — a parent theme stylesheet whose child theme gets bundled, for example — now cascade before the bundle instead of after it. Previously they printed after the bundle, which let their rules override bundled styles such as `prefers-color-scheme: dark` rules, turning dark mode off.
 
 = 3.2.1 =
 

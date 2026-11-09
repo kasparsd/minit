@@ -1,3 +1,7 @@
+## 3.2.2 (2026-11-09)
+
+- Place the CSS bundle in the print order at the position of its first bundled stylesheet instead of always printing it first. Stylesheets excluded from the bundle (with inline "after" CSS, RTL variants, print media queries or conditionals) that were enqueued before bundled ones — a parent theme stylesheet whose child theme gets bundled, for example — now cascade before the bundle instead of after it. Previously they printed after the bundle, which let their rules override bundled styles such as `prefers-color-scheme: dark` rules, turning dark mode off.
+
 ## 3.2.1 (2026-10-29)
 
 - Handle styles excluded from the bundle by printing them separately instead of silently dropping them. This affects stylesheets with inline "after" CSS and those with non-screen media queries (or conditional attributes): they are now printed by WordPress in their original position, with their inline styles intact and in the correct order.
