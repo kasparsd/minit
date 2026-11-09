@@ -3,7 +3,7 @@
 Contributors: kasparsd
 Tags: performance, speed, minify, concatenate, css, javascript
 License: GPLv2 or later
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 
 Places all your CSS and Javascript files into dedicated bundles that can be cached by browsers and re-used between requests. It assumes that a single request with slightly larger transfer size is more performant than multiple smaller requests (even with HTTP/2 multiplexing).
 
@@ -105,6 +105,13 @@ Created by [Kaspars Dambis](https://kaspars.net) and [contributors](https://gith
 == Changelog ==
 
 
+
+
+= 3.2.3 =
+
+* Never bundle assets in a later printing burst after the bundle has already been printed in the same request. WordPress cannot re-register the bundle handle with a new URL, so bundling again marked the handles as done while their combined stylesheet or script was never printed, silently dropping them. Assets that arrive late now print as-is instead.
+  
+  Also clears the CSS queue between printing bursts so late bursts start from clean state and stop re-merging handles from earlier bursts.
 
 = 3.2.2 =
 
