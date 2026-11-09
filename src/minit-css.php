@@ -41,6 +41,13 @@ class Minit_Css extends Minit_Assets {
 
 		$url = $this->minit();
 
+		// Everything still in the queue has been accounted for: bundled
+		// handles are marked as done, the rest is in $todo and prints as is.
+		// Clear it so the next printing burst of this request starts from
+		// clean state instead of re-merging stale handles.
+		$deps = $this->queue;
+		$this->queue = array();
+
 		if ( empty( $url ) ) {
 			return $todo;
 		}
@@ -48,7 +55,7 @@ class Minit_Css extends Minit_Assets {
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			$url,
-			$this->queue,
+			$deps,
 			null // We use filenames for versioning.
 		);
 
