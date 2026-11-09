@@ -53,12 +53,61 @@ class Minit_Css extends Minit_Assets {
 		);
 
 		/**
-		 * Add our Minit style since wp_enqueue_script won't do it at this point.
-		 * Place it before all other scripts.
+		 * Add our Minit style since wp_enqueue_style won't do it at this point.
+		 *
+		 * Place it at the position of the first handle that was bundled, so
+		 * stylesheets excluded from the bundle keep printing before it when
+		 * they were enqueued earlier. Previously the bundle was placed before
+		 * everything, which let excluded stylesheets (like a parent theme
+		 * stylesheet printed separately because it has inline styles) cascade
+		 * after the bundle and override bundled styles such as dark mode
+		 * rules.
 		 */
-		array_unshift( $todo, self::ASSET_HANDLE );
+		return $this->merge_print_order( (array) $todo );
+	}
 
-		return $todo;
+	/**
+	 * Reconstruct the full print order with the bundle handle placed at the
+	 * position of its first bundled member.
+	 *
+	 * Bundled handles are already marked as done and get skipped by
+	 * WP_Styles::do_items() when printing, so leaving them in the list is
+	 * harmless and keeps the list complete.
+	 *
+	 * @param string[] $todo Handles up for printing: those excluded from
+	 *                       the bundle and any leftovers from the queue.
+	 *
+	 * @return string[]
+	 */
+	protected function merge_print_order( array $todo ) {
+		$order = (array) $this->print_order;
+
+		// Make sure every handle up for printing remains in the list.
+		foreach ( $todo as $handle ) {
+			if ( ! in_array( $handle, $order, true ) ) {
+				$order[] = $handle;
+			}
+		}
+
+		// Find the first bundled handle in the print order.
+		$position = null;
+
+		foreach ( $order as $index => $handle ) {
+			if ( in_array( $handle, $this->done, true ) ) {
+				$position = $index;
+				break;
+			}
+		}
+
+		if ( null === $position ) {
+			// Without a known position, keep the previous bundle-first order.
+			array_unshift( $order, self::ASSET_HANDLE );
+			return $order;
+		}
+
+		array_splice( $order, $position, 0, self::ASSET_HANDLE );
+
+		return $order;
 	}
 
 	public function minit_item( $content, $handle, $src ) {

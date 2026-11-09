@@ -6,6 +6,17 @@ abstract class Minit_Assets {
 	public $done = array();
 
 	/**
+	 * Handles in the order they arrived for printing.
+	 *
+	 * Captured in register() so that process() can print the combined
+	 * bundle at the position of its first member instead of unconditionally
+	 * first or last.
+	 *
+	 * @var string[]
+	 */
+	public $print_order = array();
+
+	/**
 	 * Instance of either WP scripts or styles.
 	 *
 	 * @var WP_Styles|WP_Scripts
@@ -42,6 +53,13 @@ abstract class Minit_Assets {
 		if ( empty( $todo ) ) {
 			return $todo;
 		}
+
+		// Remember the print order of all handles seen so far.
+		$this->print_order = array_values(
+			array_unique(
+				array_merge( $this->print_order, $todo )
+			)
+		);
 
 		// Allow others to exclude handles from Minit.
 		$excluded = $this->get_excluded( $todo );
