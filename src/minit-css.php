@@ -84,6 +84,12 @@ class Minit_Css extends Minit_Assets {
 
 		// Make sure every handle up for printing remains in the list.
 		foreach ( $todo as $handle ) {
+			// The bundle handle can reach later filter runs once it has been
+			// enqueued for an earlier burst, which would add a duplicate.
+			if ( self::ASSET_HANDLE === $handle ) {
+				continue;
+			}
+
 			if ( ! in_array( $handle, $order, true ) ) {
 				$order[] = $handle;
 			}
@@ -100,7 +106,9 @@ class Minit_Css extends Minit_Assets {
 		}
 
 		if ( null === $position ) {
-			// Without a known position, keep the previous bundle-first order.
+			// Near-unreachable in normal flow: register() always runs before
+			// handles get marked as done. Kept as a fallback so the bundle
+			// still prints instead of being dropped entirely.
 			array_unshift( $order, self::ASSET_HANDLE );
 			return $order;
 		}
