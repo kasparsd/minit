@@ -64,8 +64,14 @@ abstract class Minit_Assets {
 		// Allow others to exclude handles from Minit.
 		$excluded = $this->get_excluded( $todo );
 
-		// Queue all of them for Minit.
-		$this->queue = array_merge( $this->queue, array_diff( $todo, $excluded ) );
+		// Queue all of them for Minit. De-dupe: handles listed in more than
+		// one printing burst (re-listed by all_deps() because they have not
+		// been printed yet) must not churn the cache key or bundle order.
+		$this->queue = array_values(
+			array_unique(
+				array_merge( $this->queue, array_diff( $todo, $excluded ) )
+			)
+		);
 
 		// Return excluded handles back to the queue.
 		return $excluded;
@@ -173,8 +179,9 @@ abstract class Minit_Assets {
 
 		/*
 		 * A bundle has already been produced and printed in this request
-		 * (`mark_done()` fills `$done` once the bundle handle has been
-		 * registered). WordPress cannot re-register the bundle handle with a
+		 * (`mark_done()` fills `$done` once a bundle has been produced and
+		 * its handles accounted for, on both the fresh and the cached path).
+		 * WordPress cannot re-register the bundle handle with a
 		 * new URL (`WP_Dependencies::add()` refuses handles that already
 		 * exist), so bundling again here would mark the handles as done while
 		 * their new bundle would never be printed, silently dropping them.

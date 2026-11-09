@@ -101,6 +101,17 @@ class Minit_Order_Test extends WP_UnitTestCase {
 			'late script printed raw, not swallowed by a second bundle'
 		);
 		$this->assertStringNotContainsString( 'minit-js-js', $late, 'no second bundle printed' );
+
+		// A third burst with yet another late script keeps printing raw.
+		wp_enqueue_script( 'minit-js-later', $this->base . '/a.js', array(), null, true );
+
+		ob_start();
+		wp_scripts()->do_footer_items();
+		$later = (string) ob_get_clean();
+
+		$this->assertSame( 1, substr_count( $later, '<script' ), 'exactly one new script tag printed in the third burst' );
+		$this->assertSame( 1, substr_count( $later, 'a.js' ), 'third-burst script printed raw' );
+		$this->assertStringNotContainsString( 'minit-js-js', $later, 'still no second bundle printed' );
 	}
 
 	/**
