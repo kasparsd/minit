@@ -171,6 +171,20 @@ abstract class Minit_Assets {
 			return false;
 		}
 
+		/*
+		 * A bundle has already been produced and printed in this request
+		 * (`mark_done()` fills `$done` once the bundle handle has been
+		 * registered). WordPress cannot re-register the bundle handle with a
+		 * new URL (`WP_Dependencies::add()` refuses handles that already
+		 * exist), so bundling again here would mark the handles as done while
+		 * their new bundle would never be printed, silently dropping them.
+		 * Instead, anything left to bundle from a later printing burst is
+		 * left for WordPress to print as is.
+		 */
+		if ( ! empty( $this->done ) ) {
+			return false;
+		}
+
 		$cache_ver = $this->cache_key( $this->queue );
 
 		// Try to get queue from cache.
