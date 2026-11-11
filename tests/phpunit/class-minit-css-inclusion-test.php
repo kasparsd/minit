@@ -149,6 +149,84 @@ class Minit_CSS_Inclusion_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The logged-in front-end scenario: the admin-bar stylesheet is excluded
+	 * from the bundle (inline bump styles, RTL variant) and depends on
+	 * dashicons, which is enqueued first and bundled cleanly. The bundle
+	 * must still cascade after the excluded parent theme stylesheet with
+	 * the light mode rules, so the bundled dark mode rules stay on top.
+	 */
+	public function test_bundle_prints_after_excluded_sheets_when_a_dependency_is_bundled_first() {
+		$base = sprintf( '%s/wp-content/plugins/minit/tests/fixtures', site_url() );
+
+		// Utility stylesheet enqueued first (dashicons, dependency of
+		// admin-bar when logged in).
+		wp_enqueue_style( 'minit-dep', $base . '/a.css' );
+
+		// Excluded stylesheet that depends on it (admin-bar: inline "after"
+		// styles and an RTL variant).
+		wp_enqueue_style( 'minit-admin-bar', $base . '/b.css', array( 'minit-dep' ) );
+		wp_add_inline_style( 'minit-admin-bar', '.b-after-rule { margin-top: 32px; }' );
+		wp_style_add_data( 'minit-admin-bar', 'rtl', 'replace' );
+
+		// Parent theme stylesheet with inline styles: excluded from the bundle.
+		wp_enqueue_style( 'minit-parent', $base . '/c.css' );
+		wp_add_inline_style( 'minit-parent', '.c-after-rule { color: red; }' );
+
+		// Child theme built on top of it: gets bundled.
+		wp_enqueue_style( 'minit-child', $base . '/d.css' );
+
+		$html = $this->print_queue(
+			array( 'minit-dep', 'minit-admin-bar', 'minit-parent', 'minit-child' )
+		);
+
+		// The dashicons-like dependency joined the bundle instead of printing
+		// as its own stylesheet.
+		$this->assertStringNotContainsString( 'a.css', $html, 'dependency bundled, not printed separately' );
+
+		// The excluded sheets and their inline styles print before the
+		// bundle, in enqueue order.
+		$positions = array(
+			'admin_bar' => strpos( $html, 'b.css' ),
+			'parent'    => strpos( $html, 'c.css' ),
+			'bundle'    => strpos( $html, sprintf( 'id=' . "'%s'", 'minit-css-css' ) ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		);
+
+		foreach ( $positions as $label => $position ) {
+			$this->assertGreaterThan( -1, $position, sprintf( '"%s" printed', $label ) );
+		}
+
+		$this->assertLessThan( $positions['parent'], $positions['admin_bar'], 'enqueue order maintained among excluded sheets' );
+		$this->assertLessThan( $positions['bundle'], $positions['parent'], 'excluded sheets and their inline styles print before the bundle' );
+
+		// The bundle carries the dependency and the child theme with the
+		// dark mode rules, not the excluded parent theme content.
+		$bundle = $this->bundle_content( $html );
+
+		$this->assertStringContainsString( '.a-rule', $bundle, 'dependency bundled' );
+		$this->assertStringContainsString( '.d-rule', $bundle, 'child theme bundled' );
+		$this->assertStringNotContainsString( '.c-rule', $bundle, 'parent theme not bundled' );
+	}
+
+	/**
+	 * Read the contents of the bundle file referenced in the printed markup.
+	 *
+	 * @param string $html Printed head markup.
+	 *
+	 * @return string Bundle file contents or an empty string.
+	 */
+	protected function bundle_content( $html ) {
+		if ( ! preg_match( '/id=\'minit-css-css\'[^>]*href=\'([^\']+\.css)\'/', $html, $matches ) ) {
+			return '';
+		}
+
+		$filename = basename( $matches[1] );
+
+		$contents = file_get_contents( $this->minit_css->file_cache()->file_path( $filename ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+
+		return false === $contents ? '' : $contents;
+	}
+
+	/**
 	 * Print-media styles excluded from bundle are printed separately, not
 	 * silently dropped.
 	 */

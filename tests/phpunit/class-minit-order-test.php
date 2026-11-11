@@ -116,8 +116,9 @@ class Minit_Order_Test extends WP_UnitTestCase {
 
 	/**
 	 * CSS: a non-local stylesheet enqueued between bundled handles stays in
-	 * the cascade after the bundle (bundled handles cannot be split around
-	 * it) and prints exactly once.
+	 * the cascade before the bundle (bundled handles cannot be split around
+	 * it, so the bundle prints at the position of its last member) and
+	 * prints exactly once.
 	 */
 	public function test_css_order_with_non_local_stylesheet_in_between() {
 		wp_enqueue_style( 'minit-first-local', $this->base . '/a.css' );
@@ -135,7 +136,7 @@ class Minit_Order_Test extends WP_UnitTestCase {
 		$this->assertSame( 1, substr_count( $html, 'cdn.example.com' ), 'non-local stylesheet printed once' );
 		$this->assertGreaterThan( -1, $positions['bundle'], 'bundle printed' );
 		$this->assertGreaterThan( -1, $positions['cdn'], 'non-local stylesheet printed' );
-		$this->assertLessThan( $positions['cdn'], $positions['bundle'], 'bundle printed before the non-local stylesheet' );
+		$this->assertGreaterThan( $positions['cdn'], $positions['bundle'], 'bundle printed after the non-local stylesheet' );
 		$this->assertStringNotContainsString( 'b.css', $html, 'second local handle bundled, not printed raw' );
 	}
 

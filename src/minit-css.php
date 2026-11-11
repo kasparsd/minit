@@ -62,20 +62,24 @@ class Minit_Css extends Minit_Assets {
 		/**
 		 * Add our Minit style since wp_enqueue_style won't do it at this point.
 		 *
-		 * Place it at the position of the first handle that was bundled, so
-		 * stylesheets excluded from the bundle keep printing before it when
-		 * they were enqueued earlier. Previously the bundle was placed before
-		 * everything, which let excluded stylesheets (like a parent theme
-		 * stylesheet printed separately because it has inline styles) cascade
-		 * after the bundle and override bundled styles such as dark mode
-		 * rules.
+		 * Place it at the position of the last handle that was bundled, so
+		 * stylesheets excluded from the bundle (like a parent theme stylesheet
+		 * printed separately because it has inline styles) cascade before it
+		 * instead of after it, which let them override bundled styles such as
+		 * dark mode rules.
 		 */
 		return $this->merge_print_order( (array) $todo );
 	}
 
 	/**
 	 * Reconstruct the full print order with the bundle handle placed at the
-	 * position of its first bundled member.
+	 * position of its last bundled member.
+	 *
+	 * Bundled handles cannot be split around a handle that is printed
+	 * separately, so the bundle prints as one block. Anchoring it at its
+	 * last member keeps the cascade closest to the enqueue order: every
+	 * handle enqueued before the last bundled member prints before the
+	 * bundle, every handle enqueued after it prints after.
 	 *
 	 * Bundled handles are already marked as done and get skipped by
 	 * WP_Styles::do_items() when printing, so leaving them in the list is
@@ -102,13 +106,12 @@ class Minit_Css extends Minit_Assets {
 			}
 		}
 
-		// Find the first bundled handle in the print order.
+		// Find the last bundled handle in the print order.
 		$position = null;
 
 		foreach ( $order as $index => $handle ) {
 			if ( in_array( $handle, $this->done, true ) ) {
 				$position = $index;
-				break;
 			}
 		}
 
